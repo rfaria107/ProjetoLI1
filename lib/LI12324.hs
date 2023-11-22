@@ -126,3 +126,20 @@ type Semente = Int
 -}
 geraAleatorios :: Semente -> Int -> [Int]
 geraAleatorios s c = take c $ randoms (mkStdGen s)
+
+
+
+geraMapa :: Mapa -> Mapa
+geraMapa mapa1 = ((40,10), Este) (60,5) [[V,V,V,V,V,V],
+                                        [P,P,A,P,P,P]
+                                        [V,E,V,E,V,V]
+                                        [V,E,V,E,V,V]
+                                        [P,P,P,P,P,P]]
+                                where V = Vazio
+                                      E = Escada 
+                                      P = Plataforma 
+                                      A = Alcapao 
+
+
+
+

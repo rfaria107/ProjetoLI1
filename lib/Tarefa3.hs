@@ -11,4 +11,4 @@ module Tarefa3 where
 import LI12324
 
 movimenta :: Semente -> Tempo -> Jogo -> Jogo
-movimenta = undefined
+movimenta = undefined 
