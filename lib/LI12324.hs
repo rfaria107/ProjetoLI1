@@ -20,8 +20,8 @@ module LI12324 (
     gravidade, geraAleatorios
     ) where
 
---import System.Random (mkStdGen, randoms)
-import Graphics.Gloss (Picture(Polygon), green, white)
+import System.Random (mkStdGen, randoms)
+import Graphics.Gloss (Picture(Polygon), green, white, Color)
 
 -- | Peças possíveis para construir um 'Mapa'.
 data Bloco
@@ -130,24 +130,20 @@ geraAleatorios s c = take c $ randoms (mkStdGen s)
 
 
 
-geraMapa :: Mapa -> Mapa
-geraMapa mapa1 = ((400,100), Este) (550,50) [[V,V,V,V,V,V],
-                                        [P,P,A,P,P,P],
-                                        [V,E,V,E,V,V],
-                                        [V,E,V,E,V,V],
-                                        [P,P,P,P,P,P]]
-                                 where  V = Vazio
-                                        E = Escada 
-                                        P = Plataforma 
-                                        A = Alcapao 
+geraMapa :: Mapa
+geraMapa = Mapa ((400,100), Este) (550,50) [[Vazio,Vazio,Vazio,Vazio,Vazio,Vazio],
+                                               [Plataforma,Plataforma,Alcapao,Plataforma,Plataforma,Plataforma],
+                                               [Vazio,Escada,Vazio,Escada,Vazio,Vazio],
+                                               [Vazio,Escada,Vazio,Escada,Vazio,Vazio],
+                                               [Plataforma,Plataforma,Plataforma,Plataforma,Plataforma,Plataforma]]
 
 
 desenhaPlayer :: Picture
-desenhaPlayer = Color green  Polygon [(375,75),(425,75),(425,125),(375,125)]
+desenhaPlayer p1 = Color green Polygon [(375,75),(425,75),(425,125),(375,125)]
 
 
 desenharFantasma :: Picture 
-desenharFantasma = Color white Polygon [(475, 300)(525,300) (525,250) (475,250)]
+desenharFantasma = Color white Polygon [(475, 300),(525,300),(525,250),(475,250)]
 
 desenhaHitbox :: Hitbox 
 desenhaHitbox = ((375,75),(425,125))

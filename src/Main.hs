@@ -40,7 +40,7 @@ get_images = do
 dm :: Display
 dm = InWindow
        "Novo Jogo"  -- título da janela
-       (400, 400)   -- dimensão da janela
+       (600, 500)   -- dimensão da janela
        (0,0)        -- posição no ecran
 
 fr :: Int
