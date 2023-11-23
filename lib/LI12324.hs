@@ -139,11 +139,11 @@ geraMapa = Mapa ((400,100), Este) (550,50) [[Vazio,Vazio,Vazio,Vazio,Vazio,Vazio
 
 
 desenhaPlayer :: Picture
-desenhaPlayer p1 = Color green Polygon [(375,75),(425,75),(425,125),(375,125)]
+desenhaPlayer = Polygon [(375,75),(425,75),(425,125),(375,125)]
 
 
 desenharFantasma :: Picture 
-desenharFantasma = Color white Polygon [(475, 300),(525,300),(525,250),(475,250)]
+desenharFantasma = Polygon [(475, 300),(525,300),(525,250),(475,250)]
 
 desenhaHitbox :: Hitbox 
 desenhaHitbox = ((375,75),(425,125))

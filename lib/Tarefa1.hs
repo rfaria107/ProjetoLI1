@@ -11,7 +11,12 @@ module Tarefa1 where
 import LI12324
 
 colisoesParede :: Mapa -> Personagem -> Bool
-colisoesParede = undefined
+colisoesParede m p
+                    |fst (posicao p) >= larguramapa || fst (posicao p) <= iniciomapa || snd (posicao p) >= alturamapa = True
+                        where 
+                                larguramapa = 600
+                                iniciomapa = 0
+                                alturamapa = 500
 
 colisoesPersonagens :: Personagem -> Personagem -> Bool
 colisoesPersonagens = undefined
