@@ -19,4 +19,8 @@ colisoesParede m p
                                 alturamapa = 500
 
 colisoesPersonagens :: Personagem -> Personagem -> Bool
-colisoesPersonagens = undefined
+colisoesPersonagens jogador p2
+                            | fst (posicao jogador) + (comprimentohitbox/2) == fst (posicao p2) - (comprimentohitboxF/2) || snd (posicao jogador) == snd (posicao p2)= True
+                                
+                                where comprimentohitbox = fst (snd (hitbox jogador)) - fst (fst (hitbox jogador))
+                                      comprimentohitboxF = fst (snd (hitbox p2)) - fst (fst (hitbox p2))
