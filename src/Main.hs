@@ -1,58 +1,86 @@
 module Main where
-import Graphics.Gloss
-import Graphics.Gloss.Interface.Pure.Game 
 
 import LI12324 
-import Data.List 
+import Graphics.Gloss
+import Graphics.Gloss.Interface.Pure.Game 
+import Mapa
+import Data.Maybe (fromJust)
 
 
+type Images = [Picture]
+type Imagens = [(String,Picture)]
+type EstadoMapa = (Jogo, Imagens)
 
-type Estado = Coordenadas
-type Coordenadas = (Float, Float)
+altura :: Float
+altura =  525
 
+comprimento :: Float 
+comprimento = (-940) 
 
+l :: Int 
+l = 10
 
+getMapa :: Jogo -> Mapa
+getMapa (Jogo m j d w) = m
 
-estadoInicial :: Estado
-estadoInicial = (0,0)
+estadoInicial :: Jogo
+estadoInicial = Jogo mapa1 [] [] (Personagem (0,0) Jogador (0,0) Oeste (1,1) False False 3 0 (False,0) )
 
+reageEvento :: Event -> Jogo -> Jogo
+reageEvento _ j = j
 
-
-estadoGlossInicial :: [Personagem]-> Mapa -> Jogo
-estadoGlossInicial ls mapa = Jogo mapa    
-
-
-
-
-
-
-
-
-
-get_images :: IO [Picture]
-get_images = do
-               pac_open <- loadBMP "pac_open.bmp"
-               pac_closed <- loadBMP "pac_closed.bmp"
-               let images = [scale 1.5 1.5 pac_open, scale 1.5 1.5 pac_closed]
-               return images
+reageTempo :: Float -> Jogo -> Jogo
+reageTempo _ j = j
 
 
-dm :: Display
-dm = InWindow
-       "Novo Jogo"  -- título da janela
-       (600, 500)   -- dimensão da janela
-       (0,0)        -- posição no ecran
+transformarMatriz :: [[Bloco]] -> Int -> [[(Bloco,(Int,Int))]]
+transformarMatriz [] x = []
+transformarMatriz mapa@((h:t)) y = transformaLinha (h) (-70) y : transformarMatriz t (y+10)
 
-fr :: Int
-fr = 50
 
-main :: IO ()
+transformaLinha :: [Bloco] -> Int -> Int -> [(Bloco,(Int,Int))]
+transformaLinha [] _ _ = []
+transformaLinha (bloco:rblocos) x y = (bloco, (x,y)) : transformaLinha rblocos (x+l) y
+
+
+desenhaMapa :: EstadoMapa -> [[(Bloco,(Int,Int))]] -> Picture
+desenhaMapa _ [] = blank
+desenhaMapa estadogloss@((Jogo mapa _ _ _), images) (h:t) = pictures [desenhaLinhaMapa images h, desenhaMapa estadogloss t]
+
+
+desenhaLinhaMapa :: Imagens -> [(Bloco, (Int,Int))] -> Picture
+desenhaLinhaMapa _ [] = blank
+desenhaLinhaMapa images ((h,(x,y)):t) = case h of
+            P -> Pictures [Translate ((fromIntegral x)*(realToFrac l)) (-(fromIntegral y)*(realToFrac l)) $ Scale 0.5 0.5 $ fromJust $ lookup "Alcapao" images, desenhaLinhaMapa images t ]
+            E -> Pictures [Translate ((fromIntegral x)*(realToFrac l)) (-(fromIntegral y)*(realToFrac l)) $ Scale 0.5 0.5 $ fromJust $ lookup "Escada" images, desenhaLinhaMapa images t ]
+            V -> Pictures [Translate ((fromIntegral x)*(realToFrac l)) (-(fromIntegral y)*(realToFrac l)) $ Scale 0.5 0.5 $ fromJust $ lookup "Alcapao" images, desenhaLinhaMapa images t ]
+            A -> Pictures [Translate ((fromIntegral x)*(realToFrac l)) (-(fromIntegral y)*(realToFrac l)) $ Scale 0.5 0.5 $ fromJust $ lookup "Alcapao" images , desenhaLinhaMapa images t ]
+
+desenhaEstado :: Imagens -> Jogo -> Picture
+desenhaEstado images jogo@(Jogo mapa@(Mapa (posi,dir) posf blocos) inimigos colecionaveis jogador) = pictures [Color black $ rectangleSolid 1200 900,
+                                                                                                                desenhaMapa (jogo,images) (transformarMatriz blocos (-20))]
+
+
+fr :: Int 
+fr = 60
+
+carregarImagens :: IO Imagens
+carregarImagens = do
+               alcapao <- loadBMP "../2023li1g086/src/block.bmp"
+               escadas <- loadBMP "../2023li1g086/src/escada.bmp"
+
+               let imagens = [("Alcapao", scale 0.2 0.2 $ alcapao),
+                                ("Escada", scale 0.2 0.2 $ escadas)
+                              ]
+               return imagens
+
 main = do 
-        imagens <- get_images
-        play  dm                          -- janela onde irá decorrer o jogo
-              (greyN 0.5)                 -- cor do fundo da janela
-              fr                          -- frame rate
-              (estadoGlossInicial imagens)  -- define estado inicial do jogo
-              desenhaEstado               -- desenha o estado do jogo
-              reageEvento                 -- reage a um evento
-              reageTempo      
+        images <- carregarImagens 
+        play
+            FullScreen                         
+            yellow                 
+            50                        
+            (estadoInicial)
+            (desenhaEstado images)        
+            reageEvento               
+            reageTempo                 
