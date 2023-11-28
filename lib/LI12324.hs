@@ -21,8 +21,7 @@ module LI12324 (
     ) where
 
 import System.Random (mkStdGen, randoms)
-import Graphics.Gloss (Picture(Polygon), green, white, Color)
-
+import Graphics.Gloss
 -- | Peças possíveis para construir um 'Mapa'.
 data Bloco
   = Escada       -- ^ Permite ao jogador mover-se verticalmente
@@ -82,7 +81,6 @@ data Personagem =
     , vida       :: Int -- ^ não negativo
     , pontos     :: Int
     , aplicaDano :: (Bool, Double) -- ^ se está armado e por quanto tempo ainda
-    , hitbox     :: Hitbox
     }
   deriving (Eq, Read, Show)
 
@@ -140,14 +138,13 @@ geraMapa = Mapa ((400,100), Este) (550,50) [[Vazio,Vazio,Vazio,Vazio,Vazio,Vazio
 
 
 desenhaPlayer :: Picture
-desenhaPlayer = Polygon [(375,75),(425,75),(425,125),(375,125)]
+desenhaPlayer = Color red $ rectangleSolid 100 100
 
 
 desenharFantasma :: Picture 
-desenharFantasma = Polygon [(475, 300),(525,300),(525,250),(475,250)]
+desenharFantasma = Color white $ rectangleSolid 100 100
 
-desenhaHitbox :: Personagem -> Hitbox 
-desenhaHitbox p = () 
-
-desenhaHitboxp2 :: Hitbox 
-desenhaHitboxp2 = ((375,75),(425,125))
+defineHitbox :: Personagem -> Hitbox 
+defineHitbox p = (ci,cs) -- Hitbox é definida pelo canto inferior esquerdo e canto superior direito
+                    where ci = (fst (posicao p) - snd (tamanho p),snd (posicao p) - snd (tamanho p))
+                          cs = (fst (posicao p) + snd (tamanho p)/2,snd (posicao p) + (snd (tamanho p)/2))
