@@ -4,11 +4,15 @@ import LI12324
 
 
 mapa1 = Mapa ((0.5, 5.5), Oeste) (0.5, 2.5)
-        [[P, P, P, P, P, P, P, P, P, P]
-        ,[V, V, V, V, V, V, V, V, V, V]
-        ,[V, V, V, V, V, V, V, V, V, V]
-        ,[P, P, A, P, V, V, P, P, P, P]
-        ,[V, V, V, V, V, V, V, V, E, V]
-        ,[V, V, V, V, V, V, V, V, E, V]
-        ,[P, P, P, P, P, P, P, P, P, P]
+        [[p, p, p, p, p, p, p, p, p, p]
+        ,[v, v, v, v, v, v, v, v, v, v]
+        ,[v, v, v, v, v, v, v, v, v, v]
+        ,[p, p, v, v, v, v, p, p, p, p]
+        ,[v, v, v, v, v, v, v, v, e, v]
+        ,[v, v, v, v, v, v, v, v, e, v]
+        ,[p, p, p, p, p, p, p, p, p, p]
         ]
+                where p = Plataforma
+                      v = Vazio
+                      a = Alcapao
+                      e = Escada

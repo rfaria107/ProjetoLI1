@@ -24,8 +24,7 @@ getMapa :: Jogo -> Mapa
 getMapa (Jogo m j d w) = m
 
 estadoInicial :: Jogo
-estadoInicial = Jogo mapa1 [] [] (Personagem (0,0) Jogador (0,0) Oeste (1,1) False False 3 0 (False,0) )
-
+estadoInicial = Jogo mapa1 [] [] (Personagem (0,0) Jogador (0,0) Oeste (1,1) False False 3 0 (False,0))
 reageEvento :: Event -> Jogo -> Jogo
 reageEvento _ j = j
 
@@ -54,10 +53,10 @@ desenhaMapa estadogloss@((Jogo mapa _ _ _), images) (h:t) = pictures [desenhaLin
 desenhaLinhaMapa :: Imagens -> [(Bloco, (Int,Int))] -> Picture
 desenhaLinhaMapa _ [] = blank
 desenhaLinhaMapa images ((h,(x,y)):t) = case h of
-            P -> Pictures [Translate ((fromIntegral x)*(realToFrac l)) (-(fromIntegral y)*(realToFrac l)) $ Scale 0.3 0.3 $ fromJust $ lookup "Plataforma" images, desenhaLinhaMapa images t ]
-            E -> Pictures [Translate ((fromIntegral x)*(realToFrac l)) (-(fromIntegral y)*(realToFrac l)) $ Scale  2.5 2.5 $ fromJust $ lookup "Escada" images, desenhaLinhaMapa images t ]
-            V -> Pictures [Translate ((fromIntegral x)*(realToFrac l)) (-(fromIntegral y)*(realToFrac l)) $ Scale 0.3 0.3 $ fromJust $ lookup "Vazio" images, desenhaLinhaMapa images t ]
-            A -> Pictures [Translate ((fromIntegral x)*(realToFrac l)) (-(fromIntegral y)*(realToFrac l)) $ Scale 1 1 $ fromJust $ lookup "Alcapao" images , desenhaLinhaMapa images t ]
+            p -> Pictures [Translate ((fromIntegral x)*(realToFrac l)) (-(fromIntegral y)*(realToFrac l)) $ Scale 0.05 0.05 $ fromJust $ lookup "Plataforma" images, desenhaLinhaMapa images t ]
+            e -> Pictures [Translate ((fromIntegral x)*(realToFrac l)) (-(fromIntegral y)*(realToFrac l)) $ Scale 10 10 $ fromJust $ lookup "Escada" images, desenhaLinhaMapa images t ]
+            v -> Pictures [Translate ((fromIntegral x)*(realToFrac l)) (-(fromIntegral y)*(realToFrac l)) $ Scale 0.5 0.5 $ fromJust $ lookup "Vazio" images, desenhaLinhaMapa images t ]
+            a -> Pictures [Translate ((fromIntegral x)*(realToFrac l)) (-(fromIntegral y)*(realToFrac l)) $ Scale 0.5 0.5 $ fromJust $ lookup "Alcapao" images , desenhaLinhaMapa images t ]
 
 
 desenhaEstado :: Imagens -> Jogo -> Picture
