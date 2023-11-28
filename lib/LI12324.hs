@@ -24,10 +24,10 @@ import System.Random (mkStdGen, randoms)
 import Graphics.Gloss
 -- | Peças possíveis para construir um 'Mapa'.
 data Bloco
-  = Escada       -- ^ Permite ao jogador mover-se verticalmente
-  | Plataforma   -- ^ Bloco sólido que pode ser utilizado como superfície
-  | Alcapao      -- ^ Bloco que desaparece após ser atravessado pelo jogador
-  | Vazio        -- ^ Espaço
+  = E       -- ^ Permite ao jogador mover-se verticalmente
+  | P   -- ^ Bloco sólido que pode ser utilizado como superfície
+  | A      -- ^ Bloco que desaparece após ser atravessado pelo jogador
+  | V        -- ^ Espaço
   deriving (Ord, Eq, Read, Show)
 
 -- | Mapa de um 'Jogo', composto por uma posição e direção inicial, posição final e uma matriz de blocos.
