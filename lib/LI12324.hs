@@ -24,10 +24,10 @@ import System.Random (mkStdGen, randoms)
 import Graphics.Gloss
 -- | Peças possíveis para construir um 'Mapa'.
 data Bloco
-  = E       -- ^ Permite ao jogador mover-se verticalmente
-  | P   -- ^ Bloco sólido que pode ser utilizado como superfície
-  | A      -- ^ Bloco que desaparece após ser atravessado pelo jogador
-  | V        -- ^ Espaço
+  = Escada      -- ^ Permite ao jogador mover-se verticalmente
+  | Plataforma   -- ^ Bloco sólido que pode ser utilizado como superfície
+  | Alcapao      -- ^ Bloco que desaparece após ser atravessado pelo jogador
+  | Vazio        -- ^ Espaço
   deriving (Ord, Eq, Read, Show)
 
 -- | Mapa de um 'Jogo', composto por uma posição e direção inicial, posição final e uma matriz de blocos.
@@ -126,8 +126,6 @@ type Semente = Int
 -}
 geraAleatorios :: Semente -> Int -> [Int]
 geraAleatorios s c = take c $ randoms (mkStdGen s)
-
-
 
 geraMapa :: Mapa
 geraMapa = Mapa ((400,100), Este) (550,50) [[Vazio,Vazio,Vazio,Vazio,Vazio,Vazio],

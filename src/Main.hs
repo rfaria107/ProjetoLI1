@@ -50,9 +50,9 @@ desenhaMapa estadogloss@((Jogo mapa _ _ _), images) (h:t) = pictures [desenhaLin
 desenhaLinhaMapa :: Imagens -> [(Bloco, (Int,Int))] -> Picture
 desenhaLinhaMapa _ [] = blank
 desenhaLinhaMapa images ((h,(x,y)):t) = case h of
-            p -> Pictures [Translate ((fromIntegral x)*(realToFrac l)) (-(fromIntegral y)*(realToFrac l)) $ Scale 0.5 0.5 $ fromJust $ lookup "Alcapao" images, desenhaLinhaMapa images t ]
-            e -> Pictures [Translate ((fromIntegral x)*(realToFrac l)) (-(fromIntegral y)*(realToFrac l)) $ Scale 0.5 0.5 $ fromJust $ lookup "Escada" images, desenhaLinhaMapa images t ]
-            v -> Pictures [Translate ((fromIntegral x)*(realToFrac l)) (-(fromIntegral y)*(realToFrac l)) $ Scale 0.5 0.5 $ fromJust $ lookup "Alcapao" images, desenhaLinhaMapa images t ]
+            p -> Pictures [Translate ((fromIntegral x)*(realToFrac l)) (-(fromIntegral y)*(realToFrac l)) $ Scale 0.05 0.05 $ fromJust $ lookup "Plataforma" images, desenhaLinhaMapa images t ]
+            e -> Pictures [Translate ((fromIntegral x)*(realToFrac l)) (-(fromIntegral y)*(realToFrac l)) $ Scale 10 10 $ fromJust $ lookup "Escada" images, desenhaLinhaMapa images t ]
+            v -> Pictures [Translate ((fromIntegral x)*(realToFrac l)) (-(fromIntegral y)*(realToFrac l)) $ Scale 0.5 0.5 $ fromJust $ lookup "Vazio" images, desenhaLinhaMapa images t ]
             a -> Pictures [Translate ((fromIntegral x)*(realToFrac l)) (-(fromIntegral y)*(realToFrac l)) $ Scale 0.5 0.5 $ fromJust $ lookup "Alcapao" images , desenhaLinhaMapa images t ]
 
 desenhaEstado :: Imagens -> Jogo -> Picture
@@ -65,11 +65,11 @@ fr = 60
 
 carregarImagens :: IO Imagens
 carregarImagens = do
-        plataforma <- loadBMP "../2023li1g086/src/block.bmp"
-        escadas <- loadBMP "../2023li1g086/src/Ladder.bmp"
-        alcapao <- loadBMP "../2023li1g086/src/alcapao.bmp"
+        plataforma <- loadBMP "../2023li1g086/resources/block.bmp"
+        escadas <- loadBMP "../2023li1g086/resources/Ladder.bmp"
+        alcapao <- loadBMP "../2023li1g086/resources/alcapao.bmp"
         let imagens = [  ("Plataforma", scale 0.43 0.2 $ plataforma),
-                          ("Escada", scale 0.43 0.5 $ escadas),
+                          ("Escada", scale 1 1 $ escadas),
                           ("Alcapao", scale 0.43 0.43 $ alcapao),
                           ("Vazio", Blank)
                         ]
