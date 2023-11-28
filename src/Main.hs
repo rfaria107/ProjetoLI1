@@ -33,14 +33,14 @@ reageTempo :: Float -> Jogo -> Jogo
 reageTempo _ j = j
 
 
-transformarMatriz :: [[Bloco]] -> Int -> [[(Bloco,(Int,Int))]]
-transformarMatriz [] x = []
-transformarMatriz mapa@((h:t)) y = transformaLinha (h) (-70) y : transformarMatriz t (y+10)
+fazMatriz :: [[Bloco]] -> Int -> [[(Bloco,(Int,Int))]]
+fazMatriz [] x = []
+fazMatriz mapa@((h:t)) y = fazLinha (h) (-45) y : fazMatriz t (y+10)
 
 
-transformaLinha :: [Bloco] -> Int -> Int -> [(Bloco,(Int,Int))]
-transformaLinha [] _ _ = []
-transformaLinha (bloco:rblocos) x y = (bloco, (x,y)) : transformaLinha rblocos (x+l) y
+fazLinha :: [Bloco] -> Int -> Int -> [(Bloco,(Int,Int))]
+fazLinha [] _ _ = []
+fazLinha (bloco:rblocos) x y = (bloco, (x,y)) : fazLinha rblocos (x+l) y
 
 
 desenhaMapa :: EstadoMapa -> [[(Bloco,(Int,Int))]] -> Picture
@@ -51,14 +51,14 @@ desenhaMapa estadogloss@((Jogo mapa _ _ _), images) (h:t) = pictures [desenhaLin
 desenhaLinhaMapa :: Imagens -> [(Bloco, (Int,Int))] -> Picture
 desenhaLinhaMapa _ [] = blank
 desenhaLinhaMapa images ((h,(x,y)):t) = case h of
-            P -> Pictures [Translate ((fromIntegral x)*(realToFrac l)) (-(fromIntegral y)*(realToFrac l)) $ Scale 0.5 0.5 $ fromJust $ lookup "Alcapao" images, desenhaLinhaMapa images t ]
-            E -> Pictures [Translate ((fromIntegral x)*(realToFrac l)) (-(fromIntegral y)*(realToFrac l)) $ Scale 0.5 0.5 $ fromJust $ lookup "Escada" images, desenhaLinhaMapa images t ]
-            V -> Pictures [Translate ((fromIntegral x)*(realToFrac l)) (-(fromIntegral y)*(realToFrac l)) $ Scale 0.5 0.5 $ fromJust $ lookup "Alcapao" images, desenhaLinhaMapa images t ]
-            A -> Pictures [Translate ((fromIntegral x)*(realToFrac l)) (-(fromIntegral y)*(realToFrac l)) $ Scale 0.5 0.5 $ fromJust $ lookup "Alcapao" images , desenhaLinhaMapa images t ]
+            P -> Pictures [Translate ((fromIntegral x)*(realToFrac l)) (-(fromIntegral y)*(realToFrac l)) $ Scale 0.3 0.3 $ fromJust $ lookup "Plataforma" images, desenhaLinhaMapa images t ]
+            E -> Pictures [Translate ((fromIntegral x)*(realToFrac l)) (-(fromIntegral y)*(realToFrac l)) $ Scale  2.5 2.5 $ fromJust $ lookup "Escada" images, desenhaLinhaMapa images t ]
+            V -> Pictures [Translate ((fromIntegral x)*(realToFrac l)) (-(fromIntegral y)*(realToFrac l)) $ Scale 0.3 0.3 $ fromJust $ lookup "Vazio" images, desenhaLinhaMapa images t ]
+            A -> Pictures [Translate ((fromIntegral x)*(realToFrac l)) (-(fromIntegral y)*(realToFrac l)) $ Scale 1 1 $ fromJust $ lookup "Alcapao" images , desenhaLinhaMapa images t ]
 
 desenhaEstado :: Imagens -> Jogo -> Picture
 desenhaEstado images jogo@(Jogo mapa@(Mapa (posi,dir) posf blocos) inimigos colecionaveis jogador) = pictures [Color black $ rectangleSolid 1200 900,
-                                                                                                                desenhaMapa (jogo,images) (transformarMatriz blocos (-20))]
+                                                                                                                desenhaMapa (jogo,images) (fazMatriz blocos (-20))]
 
 
 fr :: Int 
@@ -66,19 +66,22 @@ fr = 60
 
 carregarImagens :: IO Imagens
 carregarImagens = do
-               alcapao <- loadBMP "../2023li1g086/src/block.bmp"
-               escadas <- loadBMP "../2023li1g086/src/escada.bmp"
-
-               let imagens = [("Alcapao", scale 0.2 0.2 $ alcapao),
-                                ("Escada", scale 0.2 0.2 $ escadas)
-                              ]
-               return imagens
+        plataforma <- loadBMP "../2023li1g086/src/block.bmp"
+        escadas <- loadBMP "../2023li1g086/src/Ladder.bmp"
+        alcapao <- loadBMP "../2023li1g086/src/alcapao.bmp"
+        let imagens = [  ("Plataforma", scale 0.43 0.2 $ plataforma),
+                          ("Escada", scale 0.43 0.5 $ escadas),
+                          ("Alcapao", scale 0.43 0.43 $ alcapao),
+                          ("Vazio", Blank)
+                        ]
+          
+        return imagens
 
 main = do 
         images <- carregarImagens 
         play
             FullScreen                         
-            yellow                 
+            yellow            
             50                        
             (estadoInicial)
             (desenhaEstado images)        
