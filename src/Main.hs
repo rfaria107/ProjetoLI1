@@ -61,10 +61,19 @@ desenhaEstado images jogo@(Jogo mapa@(Mapa (posi,dir) posf blocos) inimigos cole
                                                                                                                 desenhaMapa (jogo,images) (transformarMatriz blocos (-20))]
 
 
-fr :: Int
-fr = 50
+fr :: Int 
+fr = 60
 
-main :: IO ()
+carregarImagens :: IO Imagens
+carregarImagens = do
+               alcapao <- loadBMP "../2023li1g086/src/block.bmp"
+               escadas <- loadBMP "../2023li1g086/src/escada.bmp"
+
+               let imagens = [("Alcapao", scale 0.2 0.2 $ alcapao),
+                                ("Escada", scale 0.2 0.2 $ escadas)
+                              ]
+               return imagens
+
 main = do 
         images <- carregarImagens 
         play
