@@ -25,10 +25,10 @@ import Graphics.Gloss (Picture(Polygon), green, white, Color)
 
 -- | Peças possíveis para construir um 'Mapa'.
 data Bloco
-  = Escada       -- ^ Permite ao jogador mover-se verticalmente
-  | Plataforma   -- ^ Bloco sólido que pode ser utilizado como superfície
-  | Alcapao      -- ^ Bloco que desaparece após ser atravessado pelo jogador
-  | Vazio        -- ^ Espaço
+  = E       -- ^ Permite ao jogador mover-se verticalmente
+  | P   -- ^ Bloco sólido que pode ser utilizado como superfície
+  | A      -- ^ Bloco que desaparece após ser atravessado pelo jogador
+  | V        -- ^ Espaço
   deriving (Ord, Eq, Read, Show)
 
 -- | Mapa de um 'Jogo', composto por uma posição e direção inicial, posição final e uma matriz de blocos.
@@ -82,7 +82,6 @@ data Personagem =
     , vida       :: Int -- ^ não negativo
     , pontos     :: Int
     , aplicaDano :: (Bool, Double) -- ^ se está armado e por quanto tempo ainda
-    , hitbox     :: Hitbox
     }
   deriving (Eq, Read, Show)
 
@@ -128,25 +127,3 @@ type Semente = Int
 -}
 geraAleatorios :: Semente -> Int -> [Int]
 geraAleatorios s c = take c $ randoms (mkStdGen s)
-
-
-
-geraMapa :: Mapa
-geraMapa = Mapa ((400,100), Este) (550,50) [[Vazio,Vazio,Vazio,Vazio,Vazio,Vazio],
-                                               [Plataforma,Plataforma,Alcapao,Plataforma,Plataforma,Plataforma],
-                                               [Vazio,Escada,Vazio,Escada,Vazio,Vazio],
-                                               [Vazio,Escada,Vazio,Escada,Vazio,Vazio],
-                                               [Plataforma,Plataforma,Plataforma,Plataforma,Plataforma,Plataforma]]
-
-desenhaPlayer :: Picture
-desenhaPlayer = Polygon [(375,75),(425,75),(425,125),(375,125)]
-
-
-desenharFantasma :: Picture 
-desenharFantasma = Polygon [(475, 300),(525,300),(525,250),(475,250)]
-
-desenhaHitboxJ :: Hitbox 
-desenhaHitboxJ = ((375,75),(425,125))
-
-desenhaHitboxF :: Hitbox 
-desenhaHitboxF = ((375,75),(425,125))

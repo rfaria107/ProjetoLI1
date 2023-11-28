@@ -11,16 +11,7 @@ module Tarefa1 where
 import LI12324
 
 colisoesParede :: Mapa -> Personagem -> Bool
-colisoesParede m p
-                    |fst (posicao p) >= larguramapa || fst (posicao p) <= iniciomapa || snd (posicao p) >= alturamapa = True
-                        where 
-                                larguramapa = 600
-                                iniciomapa = 0
-                                alturamapa = 500
+colisoesParede = undefined
 
 colisoesPersonagens :: Personagem -> Personagem -> Bool
-colisoesPersonagens jogador p2
-                            | fst (posicao jogador) + (comprimentohitbox/2) == fst (posicao p2) - (comprimentohitboxF/2) || snd (posicao jogador) == snd (posicao p2)= True
-                                
-                                where comprimentohitbox = fst (snd (hitbox jogador)) - fst (fst (hitbox jogador))
-                                      comprimentohitboxF = fst (snd (hitbox p2)) - fst (fst (hitbox p2))
+colisoesPersonagens = undefined
