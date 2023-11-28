@@ -138,6 +138,7 @@ geraMapa = Mapa ((400,100), Este) (550,50) [[Vazio,Vazio,Vazio,Vazio,Vazio,Vazio
                                                [Vazio,Escada,Vazio,Escada,Vazio,Vazio],
                                                [Plataforma,Plataforma,Plataforma,Plataforma,Plataforma,Plataforma]]
 
+
 desenhaPlayer :: Picture
 desenhaPlayer = Polygon [(375,75),(425,75),(425,125),(375,125)]
 
@@ -145,8 +146,8 @@ desenhaPlayer = Polygon [(375,75),(425,75),(425,125),(375,125)]
 desenharFantasma :: Picture 
 desenharFantasma = Polygon [(475, 300),(525,300),(525,250),(475,250)]
 
-desenhaHitboxJ :: Hitbox 
-desenhaHitboxJ = ((375,75),(425,125))
+desenhaHitbox :: Personagem -> Hitbox 
+desenhaHitbox p = () 
 
-desenhaHitboxF :: Hitbox 
-desenhaHitboxF = ((375,75),(425,125))
+desenhaHitboxp2 :: Hitbox 
+desenhaHitboxp2 = ((375,75),(425,125))

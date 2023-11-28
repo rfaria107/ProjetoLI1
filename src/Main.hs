@@ -27,7 +27,7 @@ estadoGlossInicial ls mapa = Jogo mapa
 
 
 
-
+{-
 
 get_images :: IO [Picture]
 get_images = do
@@ -35,7 +35,7 @@ get_images = do
                pac_closed <- loadBMP "pac_closed.bmp"
                let images = [scale 1.5 1.5 pac_open, scale 1.5 1.5 pac_closed]
                return images
-
+-}
 
 dm :: Display
 dm = InWindow
@@ -44,7 +44,7 @@ dm = InWindow
        (0,0)        -- posição no ecran
 
 fr :: Int
-fr = 50
+fr = 60
 
 main :: IO ()
 main = do 
