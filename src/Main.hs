@@ -11,13 +11,6 @@ type Images = [Picture]
 type Imagens = [(String,Picture)]
 type EstadoMapa = (Jogo, Imagens)
 
-desenhaPlayer :: Picture
-desenhaPlayer = Color blue $ rectangleSolid 100 100
-
-
-desenhaFantasma :: Picture 
-desenhaFantasma = Color white $ rectangleSolid 100 100
-
 altura :: Float
 altura =  720
 
@@ -58,11 +51,12 @@ desenhaMapa estadogloss@(Jogo mapa _ _ _, images) (h:t) = pictures [desenhaLinha
 
 desenhaLinhaMapa :: Imagens -> [(Bloco, (Int,Int))] -> Picture
 desenhaLinhaMapa _ [] = blank
-desenhaLinhaMapa images ((h,(x,y)):t) = case h of
-            p -> Pictures [Translate ((fromIntegral x)*(realToFrac l)) (-(fromIntegral y)*(realToFrac l)) $ Scale 0.1 0.1 $ fromJust $ lookup "Plataforma" images, desenhaLinhaMapa images t ]
-            e -> Pictures [Translate ((fromIntegral x)*(realToFrac l)) (-(fromIntegral y)*(realToFrac l)) $ Scale 1 1 $ fromJust $ lookup "Escada" images, desenhaLinhaMapa images t ]
-            v -> Pictures [Translate ((fromIntegral x)*(realToFrac l)) (-(fromIntegral y)*(realToFrac l)) $ Scale 1 1 $ fromJust $ lookup "Vazio" images, desenhaLinhaMapa images t ]
-            a -> Pictures [Translate ((fromIntegral x)*(realToFrac l)) (-(fromIntegral y)*(realToFrac l)) $ Scale 1 1 $ fromJust $ lookup "Alcapao" images , desenhaLinhaMapa images t ]
+desenhaLinhaMapa images ((h,(x,y)):t) = 
+    case h of
+            Plataforma -> Pictures [Translate ((fromIntegral x)*(realToFrac l)) (-(fromIntegral y)*(realToFrac l)) $ Scale 0.1 0.1 $ fromJust $ lookup "Plataforma" images, desenhaLinhaMapa images t ]
+            Escada -> Pictures [Translate ((fromIntegral x)*(realToFrac l)) (-(fromIntegral y)*(realToFrac l)) $ Scale 1 1 $ fromJust $ lookup "Escada" images, desenhaLinhaMapa images t ]
+            Vazio -> Pictures [Translate ((fromIntegral x)*(realToFrac l)) (-(fromIntegral y)*(realToFrac l)) $ Scale 1 1 $ fromJust $ lookup "Vazio" images, desenhaLinhaMapa images t ]
+            Alcapao -> Pictures [Translate ((fromIntegral x)*(realToFrac l)) (-(fromIntegral y)*(realToFrac l)) $ Scale 1 1 $ fromJust $ lookup "Alcapao" images , desenhaLinhaMapa images t ]
 
 
 
@@ -71,30 +65,21 @@ desenhaEstado images jogo@(Jogo mapa@(Mapa (posi,dir) posf blocos) inimigos cole
   pictures [Color black $ rectangleSolid 1200 900,
             desenhaMapa (jogo, images) (fazMatriz blocos (-20)),
             desenhaJogador images jogador]
-desenhaEstado images jogo@(Jogo mapa@(Mapa (posi,dir) posf blocos) inimigos colecionaveis jogador) = pictures [desenhaMapa (jogo,images) (fazMatriz blocos (-128)), translate 100 100 desenhaPlayer, desenhaFantasma]
-
 
 fr :: Int 
 fr = 60
 
 carregarImagens :: IO Imagens
 carregarImagens = do
-        plataforma <- loadBMP "../2023li1g086/src/block.bmp"
-        escadas <- loadBMP "../2023li1g086/src/Ladder.bmp"
-        alcapao <- loadBMP "../2023li1g086/src/alcapao.bmp"
-        jogador <- loadBMP "../2023li1g086/src/player.bmp"
+        plataforma <- loadBMP "../2023li1g086/resources/block.bmp"
+        escadas <- loadBMP "../2023li1g086/resources/Ladder.bmp"
+        alcapao <- loadBMP "../2023li1g086/resources/alcapao.bmp"
+        jogador <- loadBMP "../2023li1g086/resources/player.bmp"
         let imagens = [  ("Plataforma", scale 0.43 0.2 $ plataforma),
                           ("Escada", scale 0.43 0.5 $ escadas),
                           ("Alcapao", scale 0.52 0.43 $ alcapao),
                           ("Vazio", Blank),
                           ("Jogador", scale 0.3 0.3 $ jogador)
-        plataforma <- loadBMP "../2023li1g086/resources/block.bmp"
-        escadas <- loadBMP "../2023li1g086/resources/Ladder.bmp"
-        alcapao <- loadBMP "../2023li1g086/resources/alcapao.bmp"
-        let imagens = [  ("Plataforma", scale 1 1 $ plataforma),
-                          ("Escada", scale 1 1 $ escadas),
-                          ("Alcapao", scale 1 1 $ alcapao),
-                          ("Vazio", Blank)
                         ]
           
         return imagens
@@ -103,7 +88,7 @@ main = do
         images <- carregarImagens
         play
             FullScreen                         
-            black               
+            black            
             50                        
             estadoInicial
             (desenhaEstado images)        
