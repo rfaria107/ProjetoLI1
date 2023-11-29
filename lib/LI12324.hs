@@ -19,7 +19,6 @@ module LI12324 (
     -- * Funções auxiliares fornecidas
     gravidade, geraAleatorios
     ) where
-
 import System.Random (mkStdGen, randoms)
 import Graphics.Gloss
 -- | Peças possíveis para construir um 'Mapa'.
@@ -136,11 +135,11 @@ geraMapa = Mapa ((400,100), Este) (550,50) [[Vazio,Vazio,Vazio,Vazio,Vazio,Vazio
 
 
 desenhaPlayer :: Picture
-desenhaPlayer = Color red $ rectangleSolid 100 100
+desenhaPlayer = Color blue $ rectangleSolid 100 100
 
 
-desenharFantasma :: Picture 
-desenharFantasma = Color white $ rectangleSolid 100 100
+desenhaFantasma :: Picture 
+desenhaFantasma = Color white $ rectangleSolid 100 100
 
 defineHitbox :: Personagem -> Hitbox 
 defineHitbox p = (ci,cs) -- Hitbox é definida pelo canto inferior esquerdo e canto superior direito
