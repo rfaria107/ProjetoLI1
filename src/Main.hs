@@ -47,11 +47,14 @@ fazLinha :: [Bloco] -> Int -> Int -> [(Bloco,(Int,Int))]
 fazLinha [] _ _ = []
 fazLinha (bloco:rblocos) x y = (bloco, (x,y)) : fazLinha rblocos (x+l) y
 
+desenhaJogador :: Imagens -> Personagem -> Picture
+desenhaJogador images (Personagem _ Jogador (x,y) direcao tamanho _ _ _ _ _) =
+        Translate (-440) (-310) $ Scale 0.20 0.20 $ fromJust $ lookup "Jogador" images
+
 
 desenhaMapa :: EstadoMapa -> [[(Bloco,(Int,Int))]] -> Picture
 desenhaMapa _ [] = blank
 desenhaMapa estadogloss@(Jogo mapa _ _ _, images) (h:t) = pictures [desenhaLinhaMapa images h, desenhaMapa estadogloss t]
-
 
 desenhaLinhaMapa :: Imagens -> [(Bloco, (Int,Int))] -> Picture
 desenhaLinhaMapa _ [] = blank
@@ -61,7 +64,13 @@ desenhaLinhaMapa images ((h,(x,y)):t) = case h of
             v -> Pictures [Translate ((fromIntegral x)*(realToFrac l)) (-(fromIntegral y)*(realToFrac l)) $ Scale 1 1 $ fromJust $ lookup "Vazio" images, desenhaLinhaMapa images t ]
             a -> Pictures [Translate ((fromIntegral x)*(realToFrac l)) (-(fromIntegral y)*(realToFrac l)) $ Scale 1 1 $ fromJust $ lookup "Alcapao" images , desenhaLinhaMapa images t ]
 
+
+
 desenhaEstado :: Imagens -> Jogo -> Picture
+desenhaEstado images jogo@(Jogo mapa@(Mapa (posi,dir) posf blocos) inimigos colecionaveis jogador) =
+  pictures [Color black $ rectangleSolid 1200 900,
+            desenhaMapa (jogo, images) (fazMatriz blocos (-20)),
+            desenhaJogador images jogador]
 desenhaEstado images jogo@(Jogo mapa@(Mapa (posi,dir) posf blocos) inimigos colecionaveis jogador) = pictures [desenhaMapa (jogo,images) (fazMatriz blocos (-128)), translate 100 100 desenhaPlayer, desenhaFantasma]
 
 
@@ -70,6 +79,15 @@ fr = 60
 
 carregarImagens :: IO Imagens
 carregarImagens = do
+        plataforma <- loadBMP "../2023li1g086/src/block.bmp"
+        escadas <- loadBMP "../2023li1g086/src/Ladder.bmp"
+        alcapao <- loadBMP "../2023li1g086/src/alcapao.bmp"
+        jogador <- loadBMP "../2023li1g086/src/player.bmp"
+        let imagens = [  ("Plataforma", scale 0.43 0.2 $ plataforma),
+                          ("Escada", scale 0.43 0.5 $ escadas),
+                          ("Alcapao", scale 0.52 0.43 $ alcapao),
+                          ("Vazio", Blank),
+                          ("Jogador", scale 0.3 0.3 $ jogador)
         plataforma <- loadBMP "../2023li1g086/resources/block.bmp"
         escadas <- loadBMP "../2023li1g086/resources/Ladder.bmp"
         alcapao <- loadBMP "../2023li1g086/resources/alcapao.bmp"
@@ -85,7 +103,7 @@ main = do
         images <- carregarImagens
         play
             FullScreen                         
-            black            
+            black               
             50                        
             estadoInicial
             (desenhaEstado images)        
