@@ -19,13 +19,15 @@ module LI12324 (
     -- * Funções auxiliares fornecidas
     gravidade, geraAleatorios
     ) where
+
 import System.Random (mkStdGen, randoms)
-import Graphics.Gloss
+import Graphics.Gloss (Picture(Polygon), green, white, Color)
+
 -- | Peças possíveis para construir um 'Mapa'.
 data Bloco
-  = Escada      -- ^ Permite ao jogador mover-se verticalmente
-  | Plataforma   -- ^ Bloco sólido que pode ser utilizado como superfície
-  | Alcapao      -- ^ Bloco que desaparece após ser atravessado pelo jogador
+  = Escada        -- ^ Permite ao jogador mover-se verticalmente
+  | Plataforma  -- ^ Bloco sólido que pode ser utilizado como superfície
+  | Alcapao     -- ^ Bloco que desaparece após ser atravessado pelo jogador
   | Vazio        -- ^ Espaço
   deriving (Ord, Eq, Read, Show)
 
@@ -125,23 +127,3 @@ type Semente = Int
 -}
 geraAleatorios :: Semente -> Int -> [Int]
 geraAleatorios s c = take c $ randoms (mkStdGen s)
-
-geraMapa :: Mapa
-geraMapa = Mapa ((400,100), Este) (550,50) [[Vazio,Vazio,Vazio,Vazio,Vazio,Vazio],
-                                               [Plataforma,Plataforma,Alcapao,Plataforma,Plataforma,Plataforma],
-                                               [Vazio,Escada,Vazio,Escada,Vazio,Vazio],
-                                               [Vazio,Escada,Vazio,Escada,Vazio,Vazio],
-                                               [Plataforma,Plataforma,Plataforma,Plataforma,Plataforma,Plataforma]]
-
-
-desenhaPlayer :: Picture
-desenhaPlayer = Color blue $ rectangleSolid 100 100
-
-
-desenhaFantasma :: Picture 
-desenhaFantasma = Color white $ rectangleSolid 100 100
-
-defineHitbox :: Personagem -> Hitbox 
-defineHitbox p = (ci,cs) -- Hitbox é definida pelo canto inferior esquerdo e canto superior direito
-                    where ci = (fst (posicao p) - snd (tamanho p),snd (posicao p) - snd (tamanho p))
-                          cs = (fst (posicao p) + snd (tamanho p)/2,snd (posicao p) + (snd (tamanho p)/2))
