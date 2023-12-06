@@ -19,13 +19,15 @@ module LI12324 (
     -- * Funções auxiliares fornecidas
     gravidade, geraAleatorios
     ) where
+
 import System.Random (mkStdGen, randoms)
-import Graphics.Gloss
+import Graphics.Gloss (Picture(Polygon), green, white, Color)
+
 -- | Peças possíveis para construir um 'Mapa'.
 data Bloco
-  = Escada      -- ^ Permite ao jogador mover-se verticalmente
-  | Plataforma   -- ^ Bloco sólido que pode ser utilizado como superfície
-  | Alcapao      -- ^ Bloco que desaparece após ser atravessado pelo jogador
+  = Escada        -- ^ Permite ao jogador mover-se verticalmente
+  | Plataforma  -- ^ Bloco sólido que pode ser utilizado como superfície
+  | Alcapao     -- ^ Bloco que desaparece após ser atravessado pelo jogador
   | Vazio        -- ^ Espaço
   deriving (Ord, Eq, Read, Show)
 
@@ -125,19 +127,3 @@ type Semente = Int
 -}
 geraAleatorios :: Semente -> Int -> [Int]
 geraAleatorios s c = take c $ randoms (mkStdGen s)
-
-desenhaPlayer :: Picture
-desenhaPlayer = Color blue $ rectangleSolid 100 100
-
-desenhaFantasma :: Picture 
-desenhaFantasma = Color white $ rectangleSolid 100 100
-
-defineHitbox :: Personagem -> Hitbox  -- Função que, dada uma personagem, define a sua hitbox
-defineHitbox p = (ci,cs) -- Hitbox é definida pelo canto inferior esquerdo e canto superior direito
-                    where ci = (fst (posicao p) - fst (tamanho p)/2 , snd (posicao p) - snd (tamanho p)/2)
-                          cs = (fst (posicao p) + fst (tamanho p)/2 , snd (posicao p) + (snd (tamanho p)/2))
-
-colisaoHitbox :: Hitbox -> Hitbox -> Bool -- Função que verifica se duas hitboxes se sobrepõem
-colisaoHitbox ((x1,y1),(w1,z1)) ((x2,y2),(w2,z2))
-                            |x1 < x2 + w2 && x1 + w1 > x2 && y1 < y2 + z2 && y1+z1 > y2 = True
-                            |otherwise = False

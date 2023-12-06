@@ -24,7 +24,7 @@ colisaoHitbox ((x1,y1),(w1,z1)) ((x2,y2),(w2,z2))
                             |x1 < x2 + w2 && x1 + w1 > x2 && y1 < y2 + z2 && y1+z1 > y2 = True
                             |otherwise = False
 
-colisoesPersonagens :: Personagem -> Personagem -> Bool -- Função que recebe duas personagens e aplica a função que verifia se as suas hitboxes se sobrepõem
+colisoesPersonagens :: Personagem -> Personagem -> Bool
 colisoesPersonagens p1 p2 = colisaoHitbox h1 h2
                                 where h1 = defineHitbox p1
                                       h2 = defineHitbox p2
