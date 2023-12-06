@@ -126,22 +126,18 @@ type Semente = Int
 geraAleatorios :: Semente -> Int -> [Int]
 geraAleatorios s c = take c $ randoms (mkStdGen s)
 
-geraMapa :: Mapa
-geraMapa = Mapa ((400,100), Este) (550,50) [[Vazio,Vazio,Vazio,Vazio,Vazio,Vazio],
-                                               [Plataforma,Plataforma,Alcapao,Plataforma,Plataforma,Plataforma],
-                                               [Vazio,Escada,Vazio,Escada,Vazio,Vazio],
-                                               [Vazio,Escada,Vazio,Escada,Vazio,Vazio],
-                                               [Plataforma,Plataforma,Plataforma,Plataforma,Plataforma,Plataforma]]
-
-
 desenhaPlayer :: Picture
 desenhaPlayer = Color blue $ rectangleSolid 100 100
-
 
 desenhaFantasma :: Picture 
 desenhaFantasma = Color white $ rectangleSolid 100 100
 
-defineHitbox :: Personagem -> Hitbox 
+defineHitbox :: Personagem -> Hitbox  -- Função que, dada uma personagem, define a sua hitbox
 defineHitbox p = (ci,cs) -- Hitbox é definida pelo canto inferior esquerdo e canto superior direito
-                    where ci = (fst (posicao p) - snd (tamanho p),snd (posicao p) - snd (tamanho p))
-                          cs = (fst (posicao p) + snd (tamanho p)/2,snd (posicao p) + (snd (tamanho p)/2))
+                    where ci = (fst (posicao p) - fst (tamanho p)/2 , snd (posicao p) - snd (tamanho p)/2)
+                          cs = (fst (posicao p) + fst (tamanho p)/2 , snd (posicao p) + (snd (tamanho p)/2))
+
+colisaoHitbox :: Hitbox -> Hitbox -> Bool -- Função que verifica se duas hitboxes se sobrepõem
+colisaoHitbox ((x1,y1),(w1,z1)) ((x2,y2),(w2,z2))
+                            |x1 < x2 + w2 && x1 + w1 > x2 && y1 < y2 + z2 && y1+z1 > y2 = True
+                            |otherwise = False
