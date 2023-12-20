@@ -10,8 +10,9 @@ module Tarefa2 where
 
 import LI12324
 import Tarefa1
+import Data.List
 valida :: Jogo -> Bool
-valida jogo1 = validaMapa && validaInimigos && validaPos && validaNumP
+valida jogo1@(Jogo mapa1 inimigos colecionaveis jogador ) = validaMapa mapa1 && validaRessalto inimigos && validaColecionaveis jogo1 && validaNumP
                     
 validaMapa :: Mapa -> Bool -- verifica se o mapa tem chão
 validaMapa (Mapa ((xi, yi), dir) (xf, yf) matriz) = all (== Plataforma) (last matriz) -- Verficar se a última linha do mapa é constituida por elementos do tipo "Plataforma" e se a posição inicial é diferente da final
@@ -26,7 +27,18 @@ validaPos p1 p2 = not (colisaoHitbox h1 h2)
                       h2 = defineHitbox p2
 
 validaNumP :: [Personagem] -> Bool
-validaNumP p = length p > 2                            
+validaNumP p = length p >= 2                            
 
-validaVidaFantasma :: Personagem -> Bool
-validaVidaFantasma p1@(Personagem _ Fantasma (x,y) _ _ _ _ vidas _ _) = vidas == 1
+validaVidaFantasma :: Jogo -> Bool
+validaVidaFantasma (Jogo _(p1@(Personagem _ Fantasma (x,y) _ _ _ _ vidas _ _):xs) _ _ ) = vidas == 1 
+--validaEscadas :: Mapa -> Bool
+--validaEscadas (x,y) (Mapa _ _ matriz) = 
+
+validaColecionaveis :: Jogo -> Bool 
+validaColecionaveis  (Jogo (Mapa _ _ matriz) _ listac _ ) = 
+     all (\(colecionavel1, (xc,yc)) ->  blocoNaPosicao (xc,yc) matriz == Vazio) listac
+blocoNaPosicao :: Posicao -> [[Bloco]] -> Bloco -- função que, após receber uma posição e uma matriz retorna qual o tipo de bloco nesta posição da matriz
+blocoNaPosicao (x,y) matriz = (matriz !! floor y) !! floor x
+
+--encontraPlataforma :: Mapa -> [Posicao]
+--encontraPlataforma (Mapa _ _ [[blocos]])= (10 ,(elemIndices Plataforma [blocos]))

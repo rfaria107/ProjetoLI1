@@ -1,5 +1,5 @@
 module Main where
-
+    
 import LI12324 
 import Graphics.Gloss
 import Graphics.Gloss.Interface.Pure.Game 
