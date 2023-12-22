@@ -96,7 +96,6 @@ data Acao
   deriving (Eq, Read, Show)
 
 {- | Vetor velocidade da gravidade.
-
 prop> gravidade == (0, 10)
 -}
 gravidade :: Velocidade

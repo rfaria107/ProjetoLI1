@@ -12,7 +12,7 @@ import LI12324
 import Tarefa1
 import Data.List
 valida :: Jogo -> Bool
-valida jogo1@(Jogo mapa1 inimigos colecionaveis jogador ) = validaMapa mapa1 && validaRessalto inimigos && validaColecionaveis jogo1 && validaNumP
+valida jogo1@(Jogo mapa1 inimigos@(i1:is) colecionaveis jogador ) = validaMapa mapa1 && validaRessalto (inimigos++[jogador]) && validaPos i1 jogador && validaNumP inimigos && validaVidaFantasma jogo1 && validaColecionaveis jogo1
                     
 validaMapa :: Mapa -> Bool -- verifica se o mapa tem chão
 validaMapa (Mapa ((xi, yi), dir) (xf, yf) matriz) = all (== Plataforma) (last matriz) -- Verficar se a última linha do mapa é constituida por elementos do tipo "Plataforma" e se a posição inicial é diferente da final
@@ -31,6 +31,7 @@ validaNumP p = length p >= 2
 
 validaVidaFantasma :: Jogo -> Bool
 validaVidaFantasma (Jogo _(p1@(Personagem _ Fantasma (x,y) _ _ _ _ vidas _ _):xs) _ _ ) = vidas == 1 
+
 --validaEscadas :: Mapa -> Bool
 --validaEscadas (x,y) (Mapa _ _ matriz) = 
 
