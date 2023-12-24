@@ -1,5 +1,5 @@
 module Main where
-    
+
 import LI12324 
 import Graphics.Gloss
 import Graphics.Gloss.Interface.Pure.Game 
@@ -38,29 +38,31 @@ estadoInicial imagens =
 
 
 reageEvento :: Event -> Jogo -> Jogo
-reageEvento (EventKey (SpecialKey KeyLeft) Down _ _) j@(Jogo m inimigos colecionaveis (Personagem pos t (x, y) dir tam e r v p (c, d))) =
-    j { jogador = Personagem pos t (x - 1, y) Oeste tam e r v p (c, d) }
-reageEvento (EventKey (SpecialKey KeyRight) Down _ _) j@(Jogo m inimigos colecionaveis (Personagem pos t (x, y) dir tam e r v p (c, d))) =
-    j { jogador = Personagem pos t (x + 1, y) Este tam e r v p (c, d) }
-reageEvento (EventKey (SpecialKey KeyUp) Down _ _) j@(Jogo m inimigos colecionaveis (Personagem pos t (x, y) dir tam e r v p (c, d))) =
-    j { jogador = Personagem pos t (x , y + 1) Este tam e r v p (c, d) }
-reageEvento (EventKey (SpecialKey KeyDown) Down _ _) j@(Jogo m inimigos colecionaveis (Personagem pos t (x, y) dir tam e r v p (c, d))) =
-    j { jogador = Personagem pos t (x , y - 1) Este tam e r v p (c, d) }    
-reageEvento _ j = j
+reageEvento (EventKey (SpecialKey KeyLeft) Down _ _) j@(Jogo m inimigos colecionaveis (Personagem pos t (x, y) dir tam e r v p (c, d))) =  (j { jogador = Personagem pos t (x - 1, y) Oeste tam e r v p (c, d) }) 
+reageEvento (EventKey (SpecialKey KeyRight) Down _ _) j@(Jogo m inimigos colecionaveis (Personagem pos t (x, y) dir tam e r v p (c, d))) =   (j { jogador = Personagem pos t (x + 1, y) Este tam e r v p (c, d) }) 
+reageEvento (EventKey (SpecialKey KeyUp) Down _ _) j@(Jogo m inimigos colecionaveis (Personagem pos t (x, y) dir tam e r v p (c, d))) = (j { jogador = Personagem pos t (x , y + 1) Este tam e r v p (c, d) }) 
+reageEvento (EventKey (SpecialKey KeyDown) Down _ _) j@(Jogo m inimigos colecionaveis (Personagem pos t (x, y) dir tam e r v p (c, d))) = (j { jogador = Personagem pos t (x , y - 1) Este tam e r v p (c, d) }) 
+reageEvento _ j = j 
+
+
+aplicaGravidade :: Float -> Jogo -> Jogo
+aplicaGravidade _ jogo@(Jogo mapa inimigos colecionaveis jogador) =
+    jogo { jogador = jogador { posicao = (xs, ys+vy+(-0.06))} }
+  where
+    (xs, ys) = posicao jogador  
+    (vx, vy) = velocidade jogador 
 
 
 reageTempo :: Float -> Jogo -> Jogo
-reageTempo _ j = j
+reageTempo dt j@(Jogo mapa@(Mapa (posi,dir) posf blocos) inimigos colecionaveis jogador) = if  colisoesJogadorParede mapa jogador == True then j else  aplicaGravidade dt j
 
-atualizaMapa :: Personagem -> Mapa -> Mapa
-atualizaMapa jogador@(Personagem _ _ (_, y) _  _ _ _ _ _ _) mapa@(Mapa _ _ blocos)
-  | y < (-1000.0) = atualizaMapa jogador mapa1  
-  | otherwise = mapa1 
 
 desenhaJogador :: Imagens -> Personagem -> Picture
-desenhaJogador images (Personagem _ Jogador (x, y) direcao tamanho _ _ _ _ _) =
-    Pictures [ Translate (realToFrac x * realToFrac l) (realToFrac y * realToFrac l) $ Scale 1 1 $ fromJust $ lookup "Jogador" images , Color green $ Translate (realToFrac x * realToFrac l) (realToFrac y * realToFrac l) $ rectangleWire hitboxLargura hitboxAltura]
+desenhaJogador images j@(Personagem _ Jogador (x, y) direcao tamanho _ _ _ _ _) =
+    Pictures [ Translate (realToFrac x * realToFrac l) (realToFrac y * realToFrac l) $ Scale 1 1 $ fromJust $ lookup "Jogador" images , defineHitboxJ j]
 
+defineHitboxJ :: Personagem -> Picture
+defineHitboxJ (Personagem _ Jogador (x, y) direcao tamanho _ _ _ _ _) = Color green $ Translate (realToFrac x * realToFrac l) (realToFrac y * realToFrac l) $ rectangleWire hitboxLargura hitboxAltura
 
 fazMatriz :: [[Bloco]] -> Int -> [[(Bloco,(Int,Int))]]
 fazMatriz [] x = []
@@ -119,4 +121,4 @@ main = do
                 (estadoInicial images)
                 (desenhaEstado images)        
                 reageEvento               
-                reageTempo                 
+                reageTempo
