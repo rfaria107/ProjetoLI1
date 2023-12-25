@@ -9,7 +9,16 @@ Módulo para a realização da Tarefa 4 de LI1 em 2023/24.
 module Tarefa4 where
 
 import LI12324
-
+import Graphics.Gloss.Interface.Pure.Game 
+import Data.Maybe
 
 atualiza :: [Maybe Acao] -> Maybe Acao -> Jogo -> Jogo
 atualiza = undefined
+
+eventosAçao :: Event -> Maybe Acao
+eventosAçao (EventKey (SpecialKey KeySpace) Down _ _) = Just Saltar
+eventosAçao (EventKey (SpecialKey KeyUp)Down _ _) = Just Subir
+eventosAçao (EventKey (SpecialKey KeyRight) Down _ _) = Just AndarDireita
+eventosAçao (EventKey (SpecialKey KeyLeft)Down _ _) = Just AndarEsquerda
+eventosAçao (EventKey (SpecialKey KeyDown) Down _ _) = Just Descer
+eventosAçao _ = Nothing

@@ -26,6 +26,11 @@ aplicarGravidade p1@(Personagem vel Jogador pos dir (c,l) esc ress vidas pon (n,
                                                                                             |otherwise = p1
                                     
 aplicarDanoJogador :: Personagem -> Personagem -> Personagem -- p1 é o jogador e p2 o fantasma. Se a hitbox de ambos colidir o jogador perde uma vida.
-aplicarDanoJogador p1@(Personagem vel Jogador pos dir (c,l) esc ress vidas pon (n,z)) p2    | colisaoHitbox (defineHitbox p1) (defineHitbox p2) = (Personagem vel Jogador pos dir (c,l) esc ress (vidas-1) pon (n,z))
+aplicarDanoJogador p1@(Personagem vel Jogador pos dir (c,l) esc ress vidas pon (n,z)) p2    |colisaoHitbox (defineHitbox p1) (defineHitbox p2) = (Personagem vel Jogador pos dir (c,l) esc ress (vidas-1) pon (n,z))
                                                                                             |otherwise = p1
 
+apanharMoeda :: Personagem -> Jogo -> Personagem
+apanharMoeda p1@(Personagem vel Jogador (x,y) dir (c,l) esc ress vidas pon (n,z)) j1@(Jogo _ _ col _)       |colisaoHitbox (defineHitbox p1) (hitboxColecionavel col) = (Personagem vel Jogador (x,y) dir (c,l) esc ress vidas (pon+1) (n,z))
+                                                                                                            |otherwise = p1
+                                                                                                                  where hitboxColecionavel :: [(Colecionavel, Posicao)] -> Hitbox
+                                                                                                                        hitboxColecionavel ((col, (x,y)):xs) = ((x-0.5,y-0.5),(x+0.5,y+0.5))
