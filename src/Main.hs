@@ -7,7 +7,9 @@ import Mapa
 import Data.Maybe (fromJust)
 import Tarefa3
 import Tarefa1
-
+import GHC.Float (float2Double)
+import System.Random
+import Graphics.Gloss.Interface.IO.Game (playIO)
 
 type Images = [Picture]
 type Imagens = [(String,Picture)]
@@ -37,12 +39,12 @@ estadoInicial imagens =
     Jogo mapa1 [] [] (Personagem (0,0) Jogador (-40,-33.1) Oeste (1,1) False False 3 0 (False,0))
 
 
-reageEvento :: Event -> Jogo -> Jogo
-reageEvento (EventKey (SpecialKey KeyLeft) Down _ _) j@(Jogo m inimigos colecionaveis (Personagem pos t (x, y) dir tam e r v p (c, d))) =  (j { jogador = Personagem pos t (x - 1, y) Oeste tam e r v p (c, d) }) 
-reageEvento (EventKey (SpecialKey KeyRight) Down _ _) j@(Jogo m inimigos colecionaveis (Personagem pos t (x, y) dir tam e r v p (c, d))) =   (j { jogador = Personagem pos t (x + 1, y) Este tam e r v p (c, d) }) 
-reageEvento (EventKey (SpecialKey KeyUp) Down _ _) j@(Jogo m inimigos colecionaveis (Personagem pos t (x, y) dir tam e r v p (c, d))) = (j { jogador = Personagem pos t (x , y + 1) Este tam e r v p (c, d) }) 
-reageEvento (EventKey (SpecialKey KeyDown) Down _ _) j@(Jogo m inimigos colecionaveis (Personagem pos t (x, y) dir tam e r v p (c, d))) = (j { jogador = Personagem pos t (x , y - 1) Este tam e r v p (c, d) }) 
-reageEvento _ j = j 
+reageEvento :: Event -> Jogo -> IO Jogo
+reageEvento (EventKey (SpecialKey KeyLeft) Down _ _) j@(Jogo m inimigos colecionaveis (Personagem pos t (x, y) dir tam e r v p (c, d))) =  return (j { jogador = Personagem pos t (x - 1, y) Oeste tam e r v p (c, d) }) 
+reageEvento (EventKey (SpecialKey KeyRight) Down _ _) j@(Jogo m inimigos colecionaveis (Personagem pos t (x, y) dir tam e r v p (c, d))) = return  (j { jogador = Personagem pos t (x + 1, y) Este tam e r v p (c, d) }) 
+reageEvento (EventKey (SpecialKey KeyUp) Down _ _) j@(Jogo m inimigos colecionaveis (Personagem pos t (x, y) dir tam e r v p (c, d))) = return( j { jogador = Personagem pos t (x , y + 1) Este tam e r v p (c, d) }) 
+reageEvento (EventKey (SpecialKey KeyDown) Down _ _) j@(Jogo m inimigos colecionaveis (Personagem pos t (x, y) dir tam e r v p (c, d))) = return (j { jogador = Personagem pos t (x , y - 1) Este tam e r v p (c, d) }) 
+reageEvento _ j = return j 
 
 
 aplicaGravidade :: Float -> Jogo -> Jogo
@@ -53,9 +55,10 @@ aplicaGravidade _ jogo@(Jogo mapa inimigos colecionaveis jogador) =
     (vx, vy) = velocidade jogador 
 
 
-reageTempo :: Float -> Jogo -> Jogo
-reageTempo dt j@(Jogo mapa@(Mapa (posi,dir) posf blocos) inimigos colecionaveis jogador) = if  colisoesJogadorParede mapa jogador == True then j else  aplicaGravidade dt j
-
+reageTempo :: Float -> Jogo -> IO Jogo
+reageTempo fr j@(Jogo mapa@(Mapa (posi,dir) posf blocos) inimigos colecionaveis jogador) = do
+    seed <- randomRIO (1,100::Int)
+    return $ movimenta seed (float2Double fr) j
 
 desenhaJogador :: Imagens -> Personagem -> Picture
 desenhaJogador images j@(Personagem _ Jogador (x, y) direcao tamanho _ _ _ _ _) =
@@ -87,11 +90,11 @@ desenhaLinhaMapa images ((h,(x,y)):t) = case h of
                 Alcapao -> Pictures [Translate ((fromIntegral x)*(realToFrac l)) (-(fromIntegral y)*(realToFrac l)) $ Scale 1 1 $ fromJust $ lookup "Alcapao" images , desenhaLinhaMapa images t ]
 
 
-desenhaEstado :: Imagens -> Jogo -> Picture
-desenhaEstado images jogo@(Jogo mapa@(Mapa (posi,dir) posf blocos) inimigos colecionaveis jogador) =
-    pictures [Color black $ rectangleSolid 1200 900,
-              desenhaMapa (jogo, images) (fazMatriz blocos (-20)),
-              desenhaJogador images jogador]
+desenhaEstado :: Imagens -> Jogo -> IO Picture
+desenhaEstado images jogo@(Jogo mapa@(Mapa (posi,dir) posf blocos) inimigos colecionaveis jogador) = return $
+            pictures [Color black $ rectangleSolid 1200 900,
+            desenhaMapa (jogo, images) (fazMatriz blocos (-20)),
+            desenhaJogador images jogador]
 
 
 fr :: Int 
@@ -114,7 +117,7 @@ carregarImagens = do
 
 main = do 
         images <- carregarImagens 
-        play 
+        playIO 
                 FullScreen                         
                 yellow               
                 50                        
