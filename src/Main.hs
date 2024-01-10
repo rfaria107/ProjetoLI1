@@ -40,7 +40,7 @@ fr = 60
 
 estadoInicial :: Imagens -> Jogo
 estadoInicial imagens =
-    Jogo mapa1 [] [(Moeda,(-40,-3))] (Personagem (0,0) Jogador (-33.3, -33.1) Oeste (1,1) False False 3 0 (False,0))
+    Jogo mapa1 [(Personagem (0,0) Fantasma (50, -35.5) Oeste (1,1) False False 3 0 (False,0))] [(Moeda,(-40,-3))] (Personagem (0,0) Jogador (-33.3, -33.1) Oeste (1,1) False False 3 0 (False,0))
 
 reageEvento :: Event -> Jogo -> Jogo
 reageEvento (EventKey (SpecialKey KeyLeft) Down _ _) j@(Jogo m inimigos colecionaveis (Personagem pos t (x, y) dir tam e r v p (c, d))) = if colisaoEscada j then j else  (j { jogador = Personagem pos t (x - 3.5, y) Oeste tam e r v p (c, d) }) 
@@ -57,22 +57,11 @@ aplicaGravidade _ jogo@(Jogo mapa inimigos colecionaveis jogador) = if colisaoPl
 
 reageTempo :: Float -> Jogo -> Jogo
 reageTempo dt j@(Jogo mapa@(Mapa (posi,dir) posf blocos) inimigos colecionaveis jogador)
-  | colisaoPlataforma j = j
-  | colisaoEscada j = j
---   |  colisaoHitboxJogadorObjetivo (realToFrac x,realToFrac y) = error "Jogador alcançou o objetivo! Jogo encerrado."
-  | otherwise = aplicaGravidade dt j
+  | colisaoPlataforma j = (Jogo mapa (moveFantasmas inimigos) colecionaveis jogador)
+  | colisaoEscada j = (Jogo mapa (moveFantasmas inimigos) colecionaveis jogador) 
+  | otherwise = aplicaGravidade dt (Jogo mapa (moveFantasmas inimigos) colecionaveis jogador)
   where
     (x, y) = posicao jogador
-
-
--- colisaoHitboxJogadorObjetivo :: (Float, Float) -> Bool
--- colisaoHitboxJogadorObjetivo (xJ, yJ) =
---     xJ - hitboxLarguraj / 2 <= xO + hitboxLarguraO / 2 &&
---     xJ + hitboxLarguraj / 2 >= xO - hitboxLarguraO / 2 &&
---     yJ - hitboxAlturaj / 2 <= yO + hitboxAlturaO / 2 &&
---     yJ + hitboxAlturaj / 2 >= yO - hitboxAlturaO / 2
---     where
---         (xO, yO) = (-10, 0)  -- Posição do objetivo (moeda)
 
 colisaoPlataforma :: Jogo -> Bool
 colisaoPlataforma j@(Jogo mapa@(Mapa (posi,dir) posf blocos) inimigos colecionaveis jogador)    | y<=(-33.1) && y>=(-33.9) && x>=(-51.7) && x<=(51.9) = True 
@@ -94,9 +83,23 @@ desenhaJogador images j@(Personagem _ Jogador (x, y) direcao tamanho _ _ _ _ _) 
     Pictures [ Translate (realToFrac x * realToFrac l) (realToFrac y * realToFrac l) $ Scale 1 1 $ fromJust $ lookup "Jogador" images , defineHitboxJ j]
 
 desenhaObjetivo :: Imagens -> [(Colecionavel, Posicao)] -> Picture
-desenhaObjetivo images [] = blank
+desenhaObjetivo _ [] = blank
 desenhaObjetivo images (w@(Moeda, (x, y)):t) = Pictures [Translate (realToFrac x * realToFrac l) (realToFrac y * realToFrac l) $ fromJust $ lookup "Peach" images, defineHitboxO w ]
 desenhaObjetivo images ((_, _):t) = desenhaObjetivo images t
+
+desenhaInimigos :: Imagens -> [Personagem] -> Picture 
+desenhaInimigos _ [] = blank
+desenhaInimigos images (i@(Personagem _ Fantasma (x, y) direcao tamanho _ _ _ _ _):t) =  Pictures [ Translate (realToFrac x * realToFrac l) (realToFrac y * realToFrac l) $ Scale 1 1 $ fromJust $ lookup "Fantasma" images]
+desenhaInimigos images (h:t) = desenhaInimigos images t 
+
+moveFantasmas :: [Personagem] -> [Personagem]
+moveFantasmas [] = []
+moveFantasmas ((Personagem v Fantasma (x, y) d tam e r w p (False, 0)):t) =(Personagem v Fantasma (newX, y) newD tam e r w p (False, 0)) : moveFantasmas t
+                                        where 
+                                            newX = if x >= 51.9 then -51.7 else if x <= -51.7 then 51.9 else x + (if d == Este then 0.5 else -0.5)
+                                            newD = if newX >= 51.9 || newX <= -51.7 then if d == Este then Oeste else Este else d
+moveFantasmas (h:t) = h : moveFantasmas t
+
 
 defineHitboxJ :: Personagem -> Picture
 defineHitboxJ (Personagem _ Jogador (x, y) direcao tamanho _ _ _ _ _) = Color green $ Translate (realToFrac x * realToFrac l) (realToFrac y * realToFrac l) $ rectangleWire hitboxLarguraj hitboxAlturaj
@@ -130,7 +133,8 @@ desenhaEstado images jogo@(Jogo mapa@(Mapa (posi,dir) posf blocos) inimigos cole
     pictures [Color black $ rectangleSolid 1200 900,
               desenhaMapa (jogo, images) (fazMatriz blocos (-20)),
               desenhaJogador images jogador,
-              desenhaObjetivo images colecionaveis]
+              desenhaObjetivo images colecionaveis,
+              desenhaInimigos images inimigos]
 
 carregarImagens :: IO Imagens
 carregarImagens = do
@@ -139,12 +143,14 @@ carregarImagens = do
         alcapao <- loadBMP "../2023li1g086/resources/alcapao.bmp"
         jogador <- loadBMP "../2023li1g086/resources/player1.bmp"
         objetivo <- loadBMP "../2023li1g086/resources/goal.bmp"
+        fantasma <- loadBMP "../2023li1g086/resources/Fantasma.bmp"
         let imagens = [ ("Plataforma", scale 0.43 0.2 $ plataforma),
                         ("Escada", scale 0.43 0.5 $ escadas),
                         ("Alcapao", scale 0.52 0.36 $ alcapao),
                         ("Vazio", Blank),
                         ("Jogador", scale 0.33 0.33 $ jogador),
-                        ("Peach", scale 0.2 0.2 $ objetivo)
+                        ("Peach", scale 0.2 0.2 $ objetivo),
+                        ("Fantasma", scale 0.2 0.2 $ fantasma)
                         ]
         
         return imagens
