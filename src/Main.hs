@@ -35,13 +35,16 @@ comprimento = (-940)
 l :: Int 
 l = 10
 
-inimigo1 = Personagem (0,0) Fantasma (3,2) Este (1,1) False True 1 0 (False,0)
+inimigo1 = Personagem (0,0) Fantasma (50,-35.5) Este (1,1) False True 1 0 (False,0)
 
 
 inimigo2 = Personagem (0,0) Fantasma (6,10) Oeste (1,1) False True 1 0 (False,0)
 
 
-jogador1 = Personagem (0,0) Jogador (-40,-33.1) Oeste (1,1) False False 3 0 (False,0)
+jogador1 = Personagem (0,0) Jogador (-33.1,-33.1) Oeste (1,1) False False 3 0 (False,0)
+
+fr :: Int
+fr = 60
 
 definejogo1 :: Jogo
 definejogo1 = Jogo m i c j
