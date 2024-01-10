@@ -34,10 +34,9 @@ hitboxBloco (x,y) bloco = if bloco == Plataforma then ((x-0.5,y-0.5),(x+0.5,y+0.
 
 colisaoBloco :: Personagem -> Bloco -> Bool
 colisaoBloco p1@(Personagem _ _ (x,y) _ _ _ _ _ _ _) b1 | b1 == Plataforma = colisaoHitbox (defineHitbox p1) (hitboxBloco (x,y-0.5) b1)
-
 {-
 colisoesPlataforma :: Personagem -> Mapa -> Bool -- Função que deteta colisões com plataformas
-colisoesPlataforma p1@(Personagem _ _ posicao1 _ _ _ _ _ _ _) (Mapa _ _ (matriz1@(b1:bs):ls) = any colisaoHitbox p1 blocosMatriz
+colisoesPlataforma p1@(Personagem _ _ posicao1 _ _ _ _ _ _ _) Mapa _ _ (matriz1@(b1:bs):ls) = any colisaoHitbox p1 blocosMatriz
                                                                                                 where blocosMatriz = concat matriz1
                                                                                                        if bloco == Plataforma = colisaoHitbox (defineHitbox p1) (hitboxBloco posicao1 b1)
 -}

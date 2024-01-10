@@ -48,3 +48,4 @@ hitboxesColecionaveis (Jogo _ _ lc _) = case lc of
 
 morteInimigo :: Personagem -> Picture
 morteInimigo i1@(Personagem velocidade Fantasma pos dir (c,l) esc ress vidas pon (n,z)) | vidas == 0 = Blank
+
