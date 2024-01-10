@@ -30,13 +30,27 @@ comprimento = (-940)
 l :: Int 
 l = 10
 
+inimigo1 = Personagem (0,0) Fantasma (3,2) Este (1,1) False True 1 0 (False,0)
+
+
+inimigo2 = Personagem (0,0) Fantasma (6,10) Oeste (1,1) False True 1 0 (False,0)
+
+
+jogador1 = Personagem (0,0) Jogador (-40,-33.1) Oeste (1,1) False False 3 0 (False,0)
+
+definejogo1 :: Jogo
+definejogo1 = Jogo m i c j
+                where   m= mapa1
+                        i= [inimigo1,inimigo2]
+                        c= [(Moeda,(3,7)),(Martelo,(6,8))]
+                        j= jogador1
+
 getMapa :: Jogo -> Mapa
-getMapa (Jogo m j d w) = m
+getMapa j = mapa1
 
 
 estadoInicial :: Imagens -> Jogo
-estadoInicial imagens =
-    Jogo mapa1 [] [] (Personagem (0,0) Jogador (-40,-33.1) Oeste (1,1) False False 3 0 (False,0))
+estadoInicial imagens = definejogo1
 
 
 reageEvento :: Event -> Jogo -> IO Jogo
@@ -95,10 +109,6 @@ desenhaEstado images jogo@(Jogo mapa@(Mapa (posi,dir) posf blocos) inimigos cole
             pictures [Color black $ rectangleSolid 1200 900,
             desenhaMapa (jogo, images) (fazMatriz blocos (-20)),
             desenhaJogador images jogador]
-
-
-fr :: Int 
-fr = 60
 
 carregarImagens :: IO Imagens
 carregarImagens = do
