@@ -5,13 +5,18 @@ import Graphics.Gloss
 import Graphics.Gloss.Interface.Pure.Game 
 import Mapa
 import Data.Maybe (fromJust)
-import Tarefa3
 import Tarefa1
+import Tarefa2
+import Tarefa3
+import Tarefa4
 
 
 type Images = [Picture]
 type Imagens = [(String,Picture)]
 type EstadoMapa = (Jogo, Imagens)
+
+data EstadoJogo = Menu | EmJogo | GameOver deriving Eq
+
 
 hitboxLarguraj :: Float
 hitboxLarguraj = 70
@@ -35,6 +40,10 @@ comprimento = (-940)
 l :: Int 
 l = 10
 
+desenhaMenu :: Imagens -> Picture
+desenhaMenu imagens = Translate 0 100 $ fromJust $ lookup "Menu" imagens 
+
+inimigo1 :: Personagem
 inimigo1 = Personagem (0,0) Fantasma (50,-35.5) Este (1,1) False True 1 0 (False,0)
 
 
@@ -57,17 +66,23 @@ getMapa :: Jogo -> Mapa
 getMapa j = mapa1
 
 
+
 estadoInicial :: Imagens -> Jogo
 estadoInicial imagens = definejogo1
 
-
 reageEvento :: Event -> Jogo -> Jogo
-reageEvento (EventKey (SpecialKey KeyLeft) Down _ _) j@(Jogo m inimigos colecionaveis (Personagem pos t (x, y) dir tam e r v p (c, d))) = if colisaoEscada j then j else  (j { jogador = Personagem pos t (x - 3.5, y) Oeste tam e r v p (c, d) }) 
-reageEvento (EventKey (SpecialKey KeyRight) Down _ _) j@(Jogo m inimigos colecionaveis (Personagem pos t (x, y) dir tam e r v p (c, d))) = if colisaoEscada j then j else  (j { jogador = Personagem pos t (x + 3.5, y) Este tam e r v p (c, d) })
-reageEvento (EventKey (SpecialKey KeyUp) Down _ _) j@(Jogo m inimigos colecionaveis (Personagem pos t (x, y) dir tam e r v p (c, d))) = if colisaoPlataforma j || colisaoEscada j then (j { jogador = Personagem pos t (x , y + 10) Este tam e r v p (c, d) }) else j
-reageEvento (EventKey (SpecialKey KeyDown) Down _ _) j@(Jogo m inimigos colecionaveis (Personagem pos t (x, y) dir tam e r v p (c, d))) = if colisaoPlataforma j || (colisaoEscada j == False)  then j else (j { jogador = Personagem pos t (x , y - 5) Este tam e r v p (c, d) }) 
+
+--reageEvento (EventKey (SpecialKey KeyLeft) Down _ _) j@(Jogo m inimigos colecionaveis (Personagem pos t (x, y) dir tam e r v p (c, d))) = if colisaoEscada j then j else (j { jogador = Personagem pos t (x - 3.5, y) Oeste tam e r v p (c, d) }) 
+reageEvento (EventKey (SpecialKey KeyLeft) Down _ _) definejogo1 = if colisaoEscada definejogo1 then definejogo1 else atualiza [Nothing, Nothing] (Just AndarEsquerda) definejogo1
+--reageEvento (EventKey (SpecialKey KeyRight) Down _ _) j@(Jogo m inimigos colecionaveis (Personagem pos t (x, y) dir tam e r v p (c, d))) = if colisaoEscada j then j else  (j { jogador = Personagem pos t (x + 3.5, y) Este tam e r v p (c, d) })
+reageEvento (EventKey (SpecialKey KeyRight) Down _ _) definejogo1 = if colisaoEscada definejogo1 then definejogo1 else atualiza [Nothing, Nothing] (Just AndarDireita) definejogo1
+--reageEvento (EventKey (SpecialKey KeyUp) Down _ _) j@(Jogo m inimigos colecionaveis (Personagem pos t (x, y) dir tam e r v p (c, d))) = if colisaoPlataforma j || colisaoEscada j then (j { jogador = Personagem pos t (x , y + 10) Este tam e r v p (c, d) }) else j
+reageEvento (EventKey (SpecialKey KeyUp) Down _ _) definejogo1 = if colisaoPlataforma definejogo1 || colisaoEscada definejogo1 then atualiza [Nothing,Nothing] (Just Subir) definejogo1 else definejogo1
+--reageEvento (EventKey (SpecialKey KeyDown) Down _ _) j@(Jogo m inimigos colecionaveis (Personagem pos t (x, y) dir tam e r v p (c, d))) = if colisaoPlataforma j || (colisaoEscada j == False)  then j else (j { jogador = Personagem pos t (x , y - 5) Este tam e r v p (c, d) }) 
+--reageEvento (EventKey (SpecialKey KeyDown) Down _ _) j@(Jogo m inimigos colecionaveis (Personagem pos t (x, y) dir tam e r v p (c, d))) = if colisaoPlataforma j || (colisaoEscada j == False)  then j else (j { jogador = Personagem pos t (x , y - 5) Este tam e r v p (c, d) })
 reageEvento _ j = j 
  
+
 aplicaGravidade :: Float -> Jogo -> Jogo
 aplicaGravidade _ jogo@(Jogo mapa inimigos colecionaveis jogador) = if colisaoPlataforma jogo then jogo else jogo { jogador = jogador { posicao = (xs, ys+vy+(-0.4))} }
     where
@@ -94,7 +109,7 @@ colisaoEscada :: Jogo -> Bool
 colisaoEscada j@(Jogo mapa@(Mapa (posi,dir) posf blocos) inimigos colecionaveis jogador) | y>=(-100) && y<=(-3.1) && x>=(33) && x<=(35) = True
                                                                                          | otherwise = False  
                                                                 where 
-                                                                    (x,y) = posicao jogador
+                                                                    (x,y) = posicao jogador 
 
 
 desenhaJogador :: Imagens -> Personagem -> Picture
@@ -147,13 +162,14 @@ desenhaLinhaMapa images ((h,(x,y)):t) = case h of
                 Alcapao -> Pictures [Translate ((fromIntegral x)*(realToFrac l)) (-(fromIntegral y)*(realToFrac l)) $ Scale 1 1 $ fromJust $ lookup "Alcapao" images , desenhaLinhaMapa images t ]
 
 
-desenhaEstado :: Imagens -> Jogo -> Picture
-desenhaEstado images jogo@(Jogo mapa@(Mapa (posi,dir) posf blocos) inimigos colecionaveis jogador) =
-    pictures [Color black $ rectangleSolid 1200 900,
-              desenhaMapa (jogo, images) (fazMatriz blocos (-20)),
-              desenhaJogador images jogador,
-              desenhaObjetivo images colecionaveis,
-              desenhaInimigos images inimigos]
+desenhaEstado :: Imagens -> EstadoJogo -> Jogo -> Picture
+desenhaEstado images estado jogo@(Jogo mapa@(Mapa (posi,dir) posf blocos) inimigos colecionaveis jogador)
+    |estado == Menu = desenhaMenu images
+    |estado == EmJogo = pictures [Color black $ rectangleSolid 1200 900,
+                        desenhaMapa (jogo, images) (fazMatriz blocos (-20)),
+                        desenhaJogador images jogador,
+                        desenhaObjetivo images colecionaveis,
+                        desenhaInimigos images inimigos]
 
 carregarImagens :: IO Imagens
 carregarImagens = do
@@ -163,13 +179,15 @@ carregarImagens = do
         jogador <- loadBMP "../2023li1g086/resources/player1.bmp"
         objetivo <- loadBMP "../2023li1g086/resources/goal.bmp"
         fantasma <- loadBMP "../2023li1g086/resources/Fantasma.bmp"
+        menuinicial <- loadBMP "../2023li1g086/resources/menukong.bmp"
         let imagens = [ ("Plataforma", scale 0.43 0.2 $ plataforma),
                         ("Escada", scale 0.43 0.5 $ escadas),
                         ("Alcapao", scale 0.52 0.36 $ alcapao),
                         ("Vazio", Blank),
                         ("Jogador", scale 0.33 0.33 $ jogador),
                         ("Peach", scale 0.2 0.2 $ objetivo),
-                        ("Fantasma", scale 0.2 0.2 $ fantasma)
+                        ("Fantasma", scale 0.2 0.2 $ fantasma),
+                        ("Menu", scale 0.2 0.2 $ menuinicial)
                         ]
         
         return imagens
@@ -178,9 +196,10 @@ main = do
         images <- carregarImagens 
         play 
                 FullScreen                         
-                yellow               
+                black               
                 fr                      
                 (estadoInicial images)
-                (desenhaEstado images)        
+                (desenhaEstado images EmJogo)        
                 reageEvento               
                 reageTempo
+                
