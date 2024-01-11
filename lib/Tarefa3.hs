@@ -14,8 +14,8 @@ import Graphics.Gloss (Picture (Blank))
 
 movimenta :: Semente -> Tempo -> Jogo -> Jogo
 movimenta seed tempo jogo1 =  jogo1 {
-      jogador = pontosApanharMoeda (jogador jogo1) jogo1,
-      inimigos = map (aplicarDanoMartelo (jogador jogo1)) (inimigos jogo1)
+      jogador = moveJogador $ pontosApanharMoeda (jogador jogo1) jogo1--,
+      --inimigos = map (aplicarDanoMartelo (jogador jogo1)) (inimigos jogo1)
 }
 
 hitboxDano :: Personagem -> Hitbox -- a Hitbox do dano de um jogador é uma hitbox do seu tamanho colocada a seu lado para onde este estiver virado com o martelo.
@@ -49,3 +49,10 @@ hitboxesColecionaveis (Jogo _ _ lc _) = case lc of
 morteInimigo :: Personagem -> Picture
 morteInimigo i1@(Personagem velocidade Fantasma pos dir (c,l) esc ress vidas pon (n,z)) | vidas == 0 = Blank
 
+moveJogador :: Personagem -> Personagem
+moveJogador j1@(Personagem (vx,vy) Jogador (x,y) dir (c,l) esc ress vidas pon (n,z))
+                                                                                |vx>0 = Personagem (vx,vy) Jogador (x+1,y) dir (c,l) esc ress vidas pon (n,z)
+                                                                                |vx<0 = Personagem (vx,vy) Jogador (x-1,y) dir (c,l) esc ress vidas pon (n,z)
+                                                                                |vy>0 = Personagem (vx,0) Jogador (x,y+1) dir (c,l) esc ress vidas pon (n,z)
+                                                                                |vy<0 = Personagem (vx,0) Jogador (x,y-1) dir (c,l) esc ress vidas pon (n,z)
+                                                                                |otherwise = j1

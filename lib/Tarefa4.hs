@@ -14,24 +14,37 @@ import Data.Maybe
 
 atualiza :: [Maybe Acao] -> Maybe Acao -> Jogo -> Jogo
 atualiza acoesinimigos acao jogo1 = jogo1 {
-    jogador = moveJogador (velocidadeJogador (jogador jogo1) acao)
+    jogador = (velocidadeJogador (jogador jogo1) acao)
                                     }
                                     
 velocidadeJogador :: Personagem -> Maybe Acao -> Personagem
-velocidadeJogador j1@(Personagem (x,y) Jogador pos dir (c,l) esc ress vidas pon (n,z)) acao
+velocidadeJogador j1@(Personagem (vx,vy) Jogador pos dir (c,l) esc ress vidas pon (n,z)) acao
                     | acao == Just Saltar = j1 {
-                        velocidade = (x,y-1)
+                        velocidade = (vx,vy-1)
                     }
                     | acao == Just AndarDireita = j1 {
-                        velocidade = (x+1,y)
+                        velocidade = (1,vy)
                     }
                     | acao == Just AndarEsquerda = j1 {
-                        velocidade = (x-1,y)
+                        velocidade = (-1,vy)
+                    }
+                    | acao == Just Subir = j1 {
+                        velocidade = (vx,vy-1)
+                    }
+                    | acao == Just Descer = j1 {
+                        velocidade = (vx,vy+1)
+                    }
+                    | acao == Just Parar = j1 {
+                        velocidade = (0,0)
+                    }
+                    | acao == Nothing = j1 {
+                        velocidade = (vx,vy)
                     }
 
 moveJogador :: Personagem -> Personagem
 moveJogador j1@(Personagem (vx,vy) Jogador (x,y) dir (c,l) esc ress vidas pon (n,z))
-                                                                                |vx>1 = Personagem (vx-1,vy) Jogador (x+1,y) dir (c,l) esc ress vidas pon (n,z)
-                                                                                |vx<(-1) = Personagem (vx+1,vy) Jogador (x-1,y) dir (c,l) esc ress vidas pon (n,z)
-                                                                                |vy>1 = Personagem (vx,vy) Jogador (x,y-1) dir (c,l) esc ress vidas pon (n,z)
+                                                                                |vx>0 = Personagem (0,vy) Jogador (x+1,y) dir (c,l) esc ress vidas pon (n,z)
+                                                                                |vx<0 = Personagem (0,vy) Jogador (x-1,y) dir (c,l) esc ress vidas pon (n,z)
+                                                                                |vy>0 = Personagem (vx,0) Jogador (x,y+1) dir (c,l) esc ress vidas pon (n,z)
+                                                                                |vy<0 = Personagem (vx,0) Jogador (x,y-1) dir (c,l) esc ress vidas pon (n,z)
                                                                                 |otherwise = j1
