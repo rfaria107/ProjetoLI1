@@ -50,6 +50,9 @@ inimigo2 = Personagem (0,0) Fantasma (6,10) Oeste (1,1) False True 1 0 (False,0)
 
 jogador1 = Personagem (0,0) Jogador (2,6) Oeste (1,1) False False 3 0 (False,0)
 
+janela :: Display
+janela = InWindow "janela" (1920,1080) (0,0)
+
 fr :: Int
 fr = 60
 
@@ -60,7 +63,7 @@ definejogo1 = Jogo m i c j
                         c = [(Moeda,(3,7)),(Martelo,(6,8))]
                         j = jogador1
 traduzPosicao :: Posicao -> Posicao -- traduz uma posicao da lógica da matriz para esta ser utilizada no gloss
-traduzPosicao (x,y) = (x- 940/2,-(y-525/2))
+traduzPosicao (x,y) = (x*1920/20, ( - y * 1080 /10))
 
 
 getMapa :: Jogo -> Mapa
@@ -72,49 +75,17 @@ estadoInicial imagens = definejogo1
 reageEvento :: Event -> Jogo -> Jogo
 reageEvento (EventKey (SpecialKey KeyEnter) Down _ _) menu = definejogo1
 reageEvento (EventKey (SpecialKey KeySpace) Down _ _) definejogo1 = atualiza [Nothing, Nothing] (Just Saltar) definejogo1
---reageEvento (EventKey (SpecialKey KeyLeft) Down _ _) j@(Jogo m inimigos colecionaveis (Personagem pos t (x, y) dir tam e r v p (c, d))) = if colisaoEscada j then j else (j { jogador = Personagem pos t (x - 3.5, y) Oeste tam e r v p (c, d) }) 
 reageEvento (EventKey (SpecialKey KeyLeft) Down _ _) definejogo1 = atualiza [Nothing, Nothing] (Just AndarEsquerda) definejogo1
 reageEvento (EventKey (SpecialKey KeyLeft) Up _ _) definejogo1 = atualiza [Nothing, Nothing] (Just Parar) definejogo1
---reageEvento (EventKey (SpecialKey KeyRight) Down _ _) j@(Jogo m inimigos colecionaveis (Personagem pos t (x, y) dir tam e r v p (c, d))) = if colisaoEscada j then j else  (j { jogador = Personagem pos t (x + 3.5, y) Este tam e r v p (c, d) })
 reageEvento (EventKey (SpecialKey KeyRight) Down _ _) definejogo1 = atualiza [Nothing, Nothing] (Just AndarDireita) definejogo1
 reageEvento (EventKey (SpecialKey KeyRight) Up _ _) definejogo1 = atualiza [Nothing, Nothing] (Just Parar) definejogo1
---reageEvento (EventKey (SpecialKey KeyUp) Down _ _) j@(Jogo m inimigos colecionaveis (Personagem pos t (x, y) dir tam e r v p (c, d))) = if colisaoPlataforma j || colisaoEscada j then (j { jogador = Personagem pos t (x , y + 10) Este tam e r v p (c, d) }) else j
 --escadas
---reageEvento (EventKey (SpecialKey KeyUp) Down _ _) definejogo1 = if colisaoEscada definejogo1 then atualiza [Nothing,Nothing] (Just Subir) definejogo1 else definejogo1
---reageEvento (EventKey (SpecialKey KeyDown) Down _ _) j@(Jogo m inimigos colecionaveis (Personagem pos t (x, y) dir tam e r v p (c, d))) = if colisaoPlataforma j || (colisaoEscada j == False)  then j else (j { jogador = Personagem pos t (x , y - 5) Este tam e r v p (c, d) }) 
---reageEvento (EventKey (SpecialKey KeyDown) Down _ _) j@(Jogo m inimigos colecionaveis (Personagem pos t (x, y) dir tam e r v p (c, d))) = if colisaoPlataforma j || (colisaoEscada j == False)  then j else (j { jogador = Personagem pos t (x , y - 5) Este tam e r v p (c, d) })
+reageEvento (EventKey (SpecialKey KeyUp) Down _ _) definejogo1 = if colisaoPersonagemEscada (jogador definejogo1) definejogo1 then atualiza [Nothing,Nothing] (Just Subir) definejogo1 else definejogo1
 reageEvento _ j = j 
- 
 
---aplicaGravidade :: Float -> Jogo -> Jogo
---aplicaGravidade _ jogo@(Jogo mapa inimigos colecionaveis jogador) = if colisaoPlataforma jogo then jogo else jogo { jogador = jogador { posicao = (xs, ys+vy+(-0.4))} }
-  --  where
-    --    (xs, ys) = posicao jogador  
-      --  (vx, vy) = velocidade jogador 
 
 reageTempo :: Float -> Jogo -> Jogo
-reageTempo dt definejogo1
-    -- | colisaoPlataforma j = (Jogo mapa (moveFantasmas inimigos) colecionaveis jogador)
-    -- | colisaoEscada j = (Jogo mapa (moveFantasmas inimigos) colecionaveis jogador) 
-    | otherwise = movimenta 1 (float2Double dt) $ definejogo1
-
-  where
-    (x, y) = posicao (jogador definejogo1)
-{-
-colisaoPlataforma :: Jogo -> Bool
-colisaoPlataforma j@(Jogo mapa@(Mapa (posi,dir) posf blocos) inimigos colecionaveis jogador)    | y<=(-33.1) && y>=(-33.9) && x>=(-51.7) && x<=(51.9) = True 
-                                                                                                | (y>=(-4) && y<=(-3) && x>=(-51.7) && x<=(-7.7)) || (x>= (-2.4) && x<=(51.9) && y>=(-3.5) && y<=(-3)) = True
-                                                                                                | otherwise = False
-                where 
-                    (x,y) = posicao jogador
-
-
-colisaoEscada :: Jogo -> Bool
-colisaoEscada j@(Jogo mapa@(Mapa (posi,dir) posf blocos) inimigos colecionaveis jogador) | y>=(-100) && y<=(-3.1) && x>=(33) && x<=(35) = True
-                                                                                         | otherwise = False  
-                                                                where 
-                                                                    (x,y) = posicao jogador 
--}
+reageTempo dt definejogo1 = movimenta 1 (float2Double dt) $ definejogo1
 
 desenhaJogador :: Imagens -> Personagem -> Picture
 desenhaJogador images j@(Personagem _ Jogador pos direcao tamanho _ _ _ _ _) =
@@ -130,15 +101,6 @@ desenhaInimigos _ [] = blank
 desenhaInimigos images (i@(Personagem _ Fantasma pos direcao tamanho _ _ _ _ _):t) =  Pictures [ Translate (double2Float (fst (traduzPosicao pos)) * realToFrac l) (double2Float (snd (traduzPosicao pos))* realToFrac l) $ Scale 1 1 $ fromJust $ lookup "Fantasma" images]
 desenhaInimigos images (h:t) = desenhaInimigos images t 
 
-{-
-moveFantasmas :: [Personagem] -> [Personagem]
-moveFantasmas [] = []
-moveFantasmas ((Personagem v Fantasma (x, y) d tam e r w p (False, 0)):t) = (Personagem v Fantasma (newX, y) newD tam e r w p (False, 0)) : moveFantasmas t
-                                        where 
-                                            newX = if x >= 51.9 then -51.7 else if x <= -51.7 then 51.9 else x + (if d == Este then 0.5 else -0.5)
-                                            newD = if newX >= 51.9 || newX <= -51.7 then if d == Este then Oeste else Este else d
-moveFantasmas (h:t) = h : moveFantasmas t
--}
 
 defineHitboxJ :: Personagem -> Picture
 defineHitboxJ (Personagem _ Jogador pos direcao tamanho _ _ _ _ _) = Color green $ Translate (double2Float (fst (traduzPosicao pos)) * realToFrac l) (double2Float (snd (traduzPosicao pos)) * realToFrac l) $ rectangleWire hitboxLarguraj hitboxAlturaj
@@ -200,7 +162,7 @@ carregarImagens = do
 main = do 
         images <- carregarImagens 
         play 
-                FullScreen                         
+                janela                         
                 black               
                 fr                      
                 (estadoInicial images)
@@ -208,3 +170,39 @@ main = do
                 reageEvento               
                 reageTempo
                 
+{-
+colisaoPlataforma :: Jogo -> Bool
+colisaoPlataforma j@(Jogo mapa@(Mapa (posi,dir) posf blocos) inimigos colecionaveis jogador)    | y<=(-33.1) && y>=(-33.9) && x>=(-51.7) && x<=(51.9) = True 
+                                                                                                | (y>=(-4) && y<=(-3) && x>=(-51.7) && x<=(-7.7)) || (x>= (-2.4) && x<=(51.9) && y>=(-3.5) && y<=(-3)) = True
+                                                                                                | otherwise = False
+                where 
+                    (x,y) = posicao jogador
+
+
+colisaoEscada :: Jogo -> Bool
+colisaoEscada j@(Jogo mapa@(Mapa (posi,dir) posf blocos) inimigos colecionaveis jogador) | y>=(-100) && y<=(-3.1) && x>=(33) && x<=(35) = True
+                                                                                         | otherwise = False  
+                                                                where 
+                                                                    (x,y) = posicao jogador 
+
+moveFantasmas :: [Personagem] -> [Personagem]
+moveFantasmas [] = []
+moveFantasmas ((Personagem v Fantasma (x, y) d tam e r w p (False, 0)):t) = (Personagem v Fantasma (newX, y) newD tam e r w p (False, 0)) : moveFantasmas t
+                                        where 
+                                            newX = if x >= 51.9 then -51.7 else if x <= -51.7 then 51.9 else x + (if d == Este then 0.5 else -0.5)
+                                            newD = if newX >= 51.9 || newX <= -51.7 then if d == Este then Oeste else Este else d
+moveFantasmas (h:t) = h : moveFantasmas t
+
+reageEvento (EventKey (SpecialKey KeyLeft) Down _ _) j@(Jogo m inimigos colecionaveis (Personagem pos t (x, y) dir tam e r v p (c, d))) = if colisaoEscada j then j else (j { jogador = Personagem pos t (x - 3.5, y) Oeste tam e r v p (c, d) }) 
+reageEvento (EventKey (SpecialKey KeyRight) Down _ _) j@(Jogo m inimigos colecionaveis (Personagem pos t (x, y) dir tam e r v p (c, d))) = if colisaoEscada j then j else  (j { jogador = Personagem pos t (x + 3.5, y) Este tam e r v p (c, d) })
+reageEvento (EventKey (SpecialKey KeyUp) Down _ _) j@(Jogo m inimigos colecionaveis (Personagem pos t (x, y) dir tam e r v p (c, d))) = if colisaoPlataforma j || colisaoEscada j then (j { jogador = Personagem pos t (x , y + 10) Este tam e r v p (c, d) }) else j
+reageEvento (EventKey (SpecialKey KeyDown) Down _ _) j@(Jogo m inimigos colecionaveis (Personagem pos t (x, y) dir tam e r v p (c, d))) = if colisaoPlataforma j || (colisaoEscada j == False)  then j else (j { jogador = Personagem pos t (x , y - 5) Este tam e r v p (c, d) }) 
+reageEvento (EventKey (SpecialKey KeyDown) Down _ _) j@(Jogo m inimigos colecionaveis (Personagem pos t (x, y) dir tam e r v p (c, d))) = if colisaoPlataforma j || (colisaoEscada j == False)  then j else (j { jogador = Personagem pos t (x , y - 5) Este tam e r v p (c, d) })
+
+
+aplicaGravidade :: Float -> Jogo -> Jogo
+aplicaGravidade _ jogo@(Jogo mapa inimigos colecionaveis jogador) = if colisaoPlataforma jogo then jogo else jogo { jogador = jogador { posicao = (xs, ys+vy+(-0.4))} }
+    where
+        (xs, ys) = posicao jogador  
+        (vx, vy) = velocidade jogador 
+-}

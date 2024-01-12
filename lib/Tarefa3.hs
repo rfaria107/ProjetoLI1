@@ -27,6 +27,7 @@ hitboxDano p@(Personagem _ _ _ dir _ _ _ _ _ _) | dir == Oeste = ((x1-l,y1),(x2-
                                                                         where l = fst (tamanho p)
                                                                               ((x1,y1),(x2,y2)) = defineHitbox p
 aplicarDanoMartelo :: Personagem -> Personagem -> Personagem -- a p1 é o jogador com a propriedade "aplicaDano" a True, a p2 é um Fantasma. Se a hitbox do dano colidir com a hitbox do fantasma, este perde 1 vida.
+aplicarDanoMartelo p1@(Personagem _ Jogador _ _ _ _ _ _ _ (False,_)) p2@(Personagem velocidade Fantasma pos dir (c,l) esc ress vidas pon (n,z)) = p2
 aplicarDanoMartelo p1@(Personagem _ Jogador _ _ _ _ _ _ _ (True,_)) p2@(Personagem velocidade Fantasma pos dir (c,l) esc ress vidas pon (n,z))
       |colisaoHitbox (hitboxDano p1) (defineHitbox p2) = Personagem velocidade Fantasma pos dir (c,l) esc ress (vidas-1) pon (n,z)
       |otherwise = p2
@@ -39,7 +40,7 @@ morteInimigo i1@(Personagem velocidade Fantasma pos dir (c,l) esc ress vidas pon
 --3
                                                                                                                                                       
 aplicarGravidade :: Personagem -> Mapa -> Personagem
-aplicarGravidade p1@(Personagem (vx,vy) Jogador pos dir (c,l) esc ress vidas pon (n,z)) m1@(Mapa _ _ mblocos)     |not (colisaoBlocoPersonagem p1 (escolheBloco p1 m1)) = (Personagem (vx,vy+(snd gravidade)) Jogador pos dir (c,l) esc ress vidas pon (n,z))
+aplicarGravidade p1@(Personagem (vx,vy) Jogador pos dir (c,l) esc ress vidas pon (n,z)) m1@(Mapa _ _ mblocos)     |not (colisaoBlocoPersonagem p1 (escolheBloco p1 m1)) = (Personagem (vx,vy+(0.05)) Jogador pos dir (c,l) esc ress vidas pon (n,z))
                                                                                                                   |otherwise = p1
 --4
 
@@ -86,7 +87,22 @@ hitboxMoeda (Moeda, (x, y)) = ((x - 0.5, y - 0.5), (x + 0.5, y + 0.5))
 
 --6
 
+--pisaAlcapao :: Personagem -> Jogo ->  Bool
+--pisaAlcapao p1 j1@(Jogo mapa1 _ _ _)
+--                                                |escolheBloco p1 mapa1 == Alcapao = True
+--                                                |otherwise = False
+
+--desapareceAlcapao :: Personagem -> Jogo -> Mapa
+--desapareceAlcapao p1 j1@(Jogo mapa1@(Mapa _ _ mblocos) _ _ _) |pisaAlcapao p1 j1 == True = transformaBloco (escolheBloco p1 mapa1) mblocos
+
+--transformaBlocos :: Posicao -> Bloco -> [[Bloco]] -> [[Bloco]]
+--transformaBlocos pos bloco mblocos@[blocos:bs]  |bloco==Alcapao && pos == fst posicaoBloco mblocos = [[(Vazio:bs)]]
+
+--posicaoBloco :: [[Bloco]] -> [(Posicao,Bloco)] -- atribui a cada bloco da matriz uma posição
+--posicaoBloco mblocos = [((fromIntegral x, fromIntegral y),bloco) | (y,linhaBloco) <- zip [0..] mblocos, (x,bloco) <- zip [0..] linhaBloco]
+
 --movimentar o jogador
+
 moveJogador :: Personagem -> Personagem
 moveJogador j1@(Personagem (vx,vy) Jogador (x,y) dir (c,l) esc ress vidas pon (n,z))
                                                                                 |vx>0 = Personagem (vx,vy) Jogador (x+1,y) dir (c,l) esc ress vidas pon (n,z)

@@ -65,8 +65,5 @@ validaColecionaveis :: Jogo -> Bool -- extrai a posição de cada colecionável 
 validaColecionaveis  (Jogo (Mapa _ _ matriz) _ listac _ ) =
      all (\(colecionavel1, (xc,yc)) ->  escolheBlocoPos  (xc,yc) matriz == Vazio) listac
 
-escolheBlocoPos :: Posicao -> [[Bloco]] -> Bloco -- função que, após receber uma posição e uma matriz retorna qual o tipo de bloco nesta posição da matriz
-escolheBlocoPos  (x,y) matriz = (matriz !! floor y) !! floor x
-
 validaPosPersonagem :: Mapa -> [Personagem] -> Bool
 validaPosPersonagem  m1@(Mapa _ _ matriz) ((Personagem _ _ (x,y) _ (l,a) _ _ _ _ _):ps) = (((escolheBlocoPos  (x,y+a/2) matriz) == Vazio) && validaPosPersonagem m1 ps)
