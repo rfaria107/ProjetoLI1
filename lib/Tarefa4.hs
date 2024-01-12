@@ -20,7 +20,7 @@ atualiza acoesinimigos acao jogo1 = jogo1 {
 velocidadeJogador :: Personagem -> Maybe Acao -> Personagem
 velocidadeJogador j1@(Personagem (vx,vy) Jogador pos dir (c,l) esc ress vidas pon (n,z)) acao
                     | acao == Just Saltar = j1 {
-                        velocidade = (vx,vy-1)
+                        velocidade = (vx,vy+1)
                     }
                     | acao == Just AndarDireita = j1 {
                         velocidade = (1,vy)
@@ -29,10 +29,10 @@ velocidadeJogador j1@(Personagem (vx,vy) Jogador pos dir (c,l) esc ress vidas po
                         velocidade = (-1,vy)
                     }
                     | acao == Just Subir = j1 {
-                        velocidade = (vx,vy-1)
+                        velocidade = (vx,vy+1)
                     }
                     | acao == Just Descer = j1 {
-                        velocidade = (vx,vy+1)
+                        velocidade = (vx,vy-1)
                     }
                     | acao == Just Parar = j1 {
                         velocidade = (0,0)
@@ -40,11 +40,3 @@ velocidadeJogador j1@(Personagem (vx,vy) Jogador pos dir (c,l) esc ress vidas po
                     | acao == Nothing = j1 {
                         velocidade = (vx,vy)
                     }
-
-moveJogador :: Personagem -> Personagem
-moveJogador j1@(Personagem (vx,vy) Jogador (x,y) dir (c,l) esc ress vidas pon (n,z))
-                                                                                |vx>0 = Personagem (0,vy) Jogador (x+1,y) dir (c,l) esc ress vidas pon (n,z)
-                                                                                |vx<0 = Personagem (0,vy) Jogador (x-1,y) dir (c,l) esc ress vidas pon (n,z)
-                                                                                |vy>0 = Personagem (vx,0) Jogador (x,y+1) dir (c,l) esc ress vidas pon (n,z)
-                                                                                |vy<0 = Personagem (vx,0) Jogador (x,y-1) dir (c,l) esc ress vidas pon (n,z)
-                                                                                |otherwise = j1

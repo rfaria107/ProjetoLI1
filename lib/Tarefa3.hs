@@ -26,9 +26,9 @@ hitboxDano p@(Personagem _ _ _ dir _ _ _ _ _ _) | dir == Oeste = ((x1-l,y1),(x2-
 aplicarDanoMartelo :: Personagem -> Personagem -> Personagem -- a p1 é o jogador com a propriedade "aplicaDano" a True, a p2 é um Fantasma. Se a hitbox do dano colidir com a hitbox do fantasma, este perde 1 vida.
 aplicarDanoMartelo p1@(Personagem _ Jogador _ _ _ _ _ _ _ (True,_)) p2@(Personagem velocidade Fantasma pos dir (c,l) esc ress vidas pon (n,z))        |vidas >= 1 && colisaoHitbox (hitboxDano p1) (defineHitbox p2) = (Personagem velocidade Fantasma pos dir (c,l) esc ress (vidas-1) pon (n,z)) 
                                                                                                                                                       |otherwise = p2
-aplicarGravidade :: Personagem -> Bloco -> Personagem
-aplicarGravidade p1@(Personagem vel Jogador pos dir (c,l) esc ress vidas pon (n,z)) bloco1  |not (colisaoBloco p1 bloco1) = (Personagem gravidade Jogador pos dir (c,l) esc ress vidas pon (n,z))
-                                                                                            |otherwise = p1
+aplicarGravidade :: Personagem -> Mapa -> Personagem
+aplicarGravidade p1@(Personagem (vx,vy) Jogador pos dir (c,l) esc ress vidas pon (n,z)) m1@(Mapa _ _ mblocos)     |not (colisaoBloco p1 (hitboxPlataformas (posicaoBloco mblocos))) = (Personagem (vx,vy-0.3) Jogador pos dir (c,l) esc ress vidas pon (n,z))
+                                                                                                                  |otherwise = p1
                                     
 aplicarDanoJogador :: Personagem -> Personagem -> Personagem -- p1 é o jogador e p2 o fantasma. Se a hitbox de ambos colidir o jogador perde uma vida.
 aplicarDanoJogador p1@(Personagem vel Jogador pos dir (c,l) esc ress vidas pon (n,z)) p2@(Personagem velocidade2 Fantasma pos2 dir2 (c2,l2) esc2 ress2 vidas2 pon2 (n2,z2))   |vidas2 >0 && colisaoHitbox (defineHitbox p1) (defineHitbox p2) = (Personagem vel Jogador pos dir (c,l) esc ress (vidas-1) pon (n,z))

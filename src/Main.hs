@@ -67,31 +67,32 @@ estadoInicial :: Imagens -> Jogo
 estadoInicial imagens = definejogo1
 
 reageEvento :: Event -> Jogo -> Jogo
-reageEvento (EventKey (SpecialKey KeyEnter) Down _ _) menu = definejogo1 
+reageEvento (EventKey (SpecialKey KeyEnter) Down _ _) menu = definejogo1
+reageEvento (EventKey (SpecialKey KeySpace) Down _ _) definejogo1 = atualiza [Nothing, Nothing] (Just Saltar) definejogo1
 --reageEvento (EventKey (SpecialKey KeyLeft) Down _ _) j@(Jogo m inimigos colecionaveis (Personagem pos t (x, y) dir tam e r v p (c, d))) = if colisaoEscada j then j else (j { jogador = Personagem pos t (x - 3.5, y) Oeste tam e r v p (c, d) }) 
-reageEvento (EventKey (SpecialKey KeyLeft) Down _ _) definejogo1 = if colisaoEscada definejogo1 then definejogo1 else atualiza [Nothing, Nothing] (Just AndarEsquerda) definejogo1
+reageEvento (EventKey (SpecialKey KeyLeft) Down _ _) definejogo1 = atualiza [Nothing, Nothing] (Just AndarEsquerda) definejogo1
 reageEvento (EventKey (SpecialKey KeyLeft) Up _ _) definejogo1 = atualiza [Nothing, Nothing] (Just Parar) definejogo1
 --reageEvento (EventKey (SpecialKey KeyRight) Down _ _) j@(Jogo m inimigos colecionaveis (Personagem pos t (x, y) dir tam e r v p (c, d))) = if colisaoEscada j then j else  (j { jogador = Personagem pos t (x + 3.5, y) Este tam e r v p (c, d) })
-reageEvento (EventKey (SpecialKey KeyRight) Down _ _) definejogo1 = if colisaoEscada definejogo1 then definejogo1 else atualiza [Nothing, Nothing] (Just AndarDireita) definejogo1
+reageEvento (EventKey (SpecialKey KeyRight) Down _ _) definejogo1 = atualiza [Nothing, Nothing] (Just AndarDireita) definejogo1
 reageEvento (EventKey (SpecialKey KeyRight) Up _ _) definejogo1 = atualiza [Nothing, Nothing] (Just Parar) definejogo1
 --reageEvento (EventKey (SpecialKey KeyUp) Down _ _) j@(Jogo m inimigos colecionaveis (Personagem pos t (x, y) dir tam e r v p (c, d))) = if colisaoPlataforma j || colisaoEscada j then (j { jogador = Personagem pos t (x , y + 10) Este tam e r v p (c, d) }) else j
-reageEvento (EventKey (SpecialKey KeyUp) Down _ _) definejogo1 = if colisaoPlataforma definejogo1 || colisaoEscada definejogo1 then atualiza [Nothing,Nothing] (Just Subir) definejogo1 else definejogo1
+reageEvento (EventKey (SpecialKey KeyUp) Down _ _) definejogo1 = if colisaoEscada definejogo1 then atualiza [Nothing,Nothing] (Just Subir) definejogo1 else definejogo1
 --reageEvento (EventKey (SpecialKey KeyDown) Down _ _) j@(Jogo m inimigos colecionaveis (Personagem pos t (x, y) dir tam e r v p (c, d))) = if colisaoPlataforma j || (colisaoEscada j == False)  then j else (j { jogador = Personagem pos t (x , y - 5) Este tam e r v p (c, d) }) 
 --reageEvento (EventKey (SpecialKey KeyDown) Down _ _) j@(Jogo m inimigos colecionaveis (Personagem pos t (x, y) dir tam e r v p (c, d))) = if colisaoPlataforma j || (colisaoEscada j == False)  then j else (j { jogador = Personagem pos t (x , y - 5) Este tam e r v p (c, d) })
 reageEvento _ j = j 
  
 
-aplicaGravidade :: Float -> Jogo -> Jogo
-aplicaGravidade _ jogo@(Jogo mapa inimigos colecionaveis jogador) = if colisaoPlataforma jogo then jogo else jogo { jogador = jogador { posicao = (xs, ys+vy+(-0.4))} }
-    where
-        (xs, ys) = posicao jogador  
-        (vx, vy) = velocidade jogador 
+--aplicaGravidade :: Float -> Jogo -> Jogo
+--aplicaGravidade _ jogo@(Jogo mapa inimigos colecionaveis jogador) = if colisaoPlataforma jogo then jogo else jogo { jogador = jogador { posicao = (xs, ys+vy+(-0.4))} }
+  --  where
+    --    (xs, ys) = posicao jogador  
+      --  (vx, vy) = velocidade jogador 
 
 reageTempo :: Float -> Jogo -> Jogo
 reageTempo dt j@(Jogo mapa@(Mapa (posi,dir) posf blocos) inimigos colecionaveis jogador)
     -- | colisaoPlataforma j = (Jogo mapa (moveFantasmas inimigos) colecionaveis jogador)
     -- | colisaoEscada j = (Jogo mapa (moveFantasmas inimigos) colecionaveis jogador) 
-    | otherwise = movimenta 1 (float2Double dt) $ aplicaGravidade dt (Jogo mapa (moveFantasmas inimigos) colecionaveis jogador)
+    | otherwise = movimenta 1 (float2Double dt) $ (Jogo mapa (moveFantasmas inimigos) colecionaveis jogador)
 
   where
     (x, y) = posicao jogador

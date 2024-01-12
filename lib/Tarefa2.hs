@@ -11,35 +11,50 @@ module Tarefa2 where
 import LI12324
 import Tarefa1
 import Data.List
+
 valida :: Jogo -> Bool
-valida jogo1@(Jogo mapa1 inimigos@(i1:is) colecionaveis jogador ) = validaMapa mapa1 && validaRessalto (inimigos++[jogador]) && validaPos i1 jogador && validaNumP inimigos && validaVidaFantasma jogo1 && validaColecionaveis jogo1
-                    
+valida jogo1@(Jogo mapa1 inimigos@(i1:is) colecionaveis jogador ) = 
+     validaMapa mapa1 && validaRessalto (jogador:inimigos) && validaPos jogador inimigos && validaNumP inimigos && validaVidaFantasma inimigos && validaColecionaveis jogo1 && validaPosPersonagem mapa1 (jogador:inimigos)
+
+--1
+
 validaMapa :: Mapa -> Bool -- verifica se o mapa tem chão
-validaMapa (Mapa ((xi, yi), dir) (xf, yf) matriz) = all (== Plataforma) (last matriz) -- Verficar se a última linha do mapa é constituida por elementos do tipo "Plataforma" e se a posição inicial é diferente da final
+validaMapa (Mapa _ _ matriz) = all (== Plataforma) (last matriz) -- Verficar se a última linha do mapa é constituida por elementos do tipo "Plataforma" e se a posição inicial é diferente da final
+
+--2
 
 validaRessalto :: [Personagem] -> Bool -- verifica se os inimigos têm a propriedade ressalta True e o jogador False
 validaRessalto lp@(p:ps) = all aux lp
                         where aux p = if tipo p == Jogador then not (ressalta p) else ressalta p
+--3
 
-validaPos :: Personagem -> Personagem -> Bool
-validaPos p1 p2 = not (colisaoHitbox h1 h2)
+validaPos :: Personagem -> [Personagem] -> Bool -- verifica se a hitbox do jogador colide com a hitbox de algum dos inimigos. Se tal acontecer a função retorna False, indicando que o jogo não é válido.
+validaPos p1 p2 = not (any (== True) (map (colisaoHitbox h1) h2))
                 where h1 = defineHitbox p1
-                      h2 = defineHitbox p2
+                      h2 = map defineHitbox p2
+--4
 
 validaNumP :: [Personagem] -> Bool
 validaNumP p = length p >= 2                            
 
-validaVidaFantasma :: Jogo -> Bool
-validaVidaFantasma (Jogo _(p1@(Personagem _ Fantasma (x,y) _ _ _ _ vidas _ _):xs) _ _ ) = vidas == 1 
+--5
+
+validaVidaFantasma :: [Personagem] -> Bool -- verifica se os fantasmas possuem apenas uma vida
+validaVidaFantasma i@(i1:xs) = not (any (==False) (map verificavida i))
+                              where verificavida :: Personagem -> Bool
+                                    verificavida i = vida i == 1
 
 --validaEscadas :: Mapa -> Bool
 --validaEscadas (x,y) (Mapa _ _ matriz) = 
 
-validaColecionaveis :: Jogo -> Bool 
+--8
+
+validaColecionaveis :: Jogo -> Bool -- extrai a posição de cada colecionável e verifica, com recurso à função blocoNaPosicao, se o bloco nessa posição é vazio, retornando True se tal acontecer para todos os colecionáveis
 validaColecionaveis  (Jogo (Mapa _ _ matriz) _ listac _ ) = 
      all (\(colecionavel1, (xc,yc)) ->  blocoNaPosicao (xc,yc) matriz == Vazio) listac
+
 blocoNaPosicao :: Posicao -> [[Bloco]] -> Bloco -- função que, após receber uma posição e uma matriz retorna qual o tipo de bloco nesta posição da matriz
 blocoNaPosicao (x,y) matriz = (matriz !! floor y) !! floor x
 
---encontraPlataforma :: Mapa -> [Posicao]
---encontraPlataforma (Mapa _ _ [[blocos]])= (10 ,(elemIndices Plataforma [blocos]))
+validaPosPersonagem :: Mapa -> [Personagem] -> Bool
+validaPosPersonagem  m1@(Mapa _ _ matriz) ((Personagem _ _ (x,y) _ _ _ _ _ _ _):ps) = (((blocoNaPosicao (x,y) matriz) == Vazio) && validaPosPersonagem m1 ps)
