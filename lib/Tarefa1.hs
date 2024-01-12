@@ -17,7 +17,8 @@ colisoesJogadorParede :: Mapa -> Personagem -> Bool -- Função que verifica se 
 colisoesJogadorParede (Mapa _ _ (l1:ls)) p
                   |fst (snd (defineHitbox p)) >= fromIntegral (length l1) || fst (fst (defineHitbox p)) <= 0 || snd (snd (defineHitbox p)) >= 0 = True  --laterais e topo do mapa 
                   |otherwise = False
- 
+-- entre personagens
+
 defineHitbox :: Personagem -> Hitbox  -- Função que, dada uma personagem, define a sua hitbox
 defineHitbox p = (ci,cs) -- Hitbox é definida pelo canto inferior esquerdo e canto superior direito
                     where ci = (fst (posicao p) - fst (tamanho p)/2 , snd (posicao p) - snd (tamanho p)/2)
@@ -32,6 +33,7 @@ colisoesPersonagens :: Personagem -> Personagem -> Bool
 colisoesPersonagens p1 p2 = colisaoHitbox h1 h2
                                 where h1 = defineHitbox p1
                                       h2 = defineHitbox p2
+-- entre personagens e plataformas
 
 posicaoBloco :: [[Bloco]] -> [(Posicao,Bloco)] -- atribui a cada bloco da matriz uma posição
 posicaoBloco mblocos = [((fromIntegral x, fromIntegral y),bloco) | (y,linhaBloco) <- zip [0..] mblocos, (x,bloco) <- zip [0..] linhaBloco]
@@ -44,3 +46,11 @@ hitboxPlataformas = map hitboxPlat
 
 colisaoBloco :: Personagem -> [Hitbox] -> Bool
 colisaoBloco p1@(Personagem _ _ (x,y) _ _ _ _ _ _ _) plataformas = any (==True) (map (colisaoHitbox (defineHitbox p1)) plataformas)
+
+--versão que apenas verifica se o bloco abaixo do personagem é uma plataforma (útil noutras tarefas)
+
+escolheBloco :: Personagem -> Mapa -> Bloco
+escolheBloco p1@(Personagem _ _ (x,y) _ _ _ _ _ _ _) (Mapa _ _ mblocos) = (mblocos !! floor y) !! floor x
+
+colisaoBlocoPersonagem :: Personagem -> Bloco -> Bool
+colisaoBlocoPersonagem p1 b = colisaoHitbox (defineHitbox p1) (hitboxPlat ((fst (posicao p1),snd (posicao p1)+0.5),b)) 

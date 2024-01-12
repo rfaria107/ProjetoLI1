@@ -13,7 +13,7 @@ import Tarefa1
 import Data.List
 
 valida :: Jogo -> Bool
-valida jogo1@(Jogo mapa1 inimigos@(i1:is) colecionaveis jogador ) = 
+valida jogo1@(Jogo mapa1 inimigos colecionaveis jogador ) =
      validaMapa mapa1 && validaRessalto (jogador:inimigos) && validaPos jogador inimigos && validaNumP inimigos && validaVidaFantasma inimigos && validaColecionaveis jogo1 && validaPosPersonagem mapa1 (jogador:inimigos)
 
 --1
@@ -35,7 +35,7 @@ validaPos p1 p2 = not (any (== True) (map (colisaoHitbox h1) h2))
 --4
 
 validaNumP :: [Personagem] -> Bool
-validaNumP p = length p >= 2                            
+validaNumP p = length p >= 2
 
 --5
 
@@ -43,18 +43,30 @@ validaVidaFantasma :: [Personagem] -> Bool -- verifica se os fantasmas possuem a
 validaVidaFantasma i@(i1:xs) = not (any (==False) (map verificavida i))
                               where verificavida :: Personagem -> Bool
                                     verificavida i = vida i == 1
+--6
 
---validaEscadas :: Mapa -> Bool
---validaEscadas (x,y) (Mapa _ _ matriz) = 
+validaEscada :: (Posicao,Bloco) -> [[Bloco]]  -> Bool
+validaEscada ((x,y),b1) mblocos
+                              |b1== Escada = (cima == Plataforma || baixo == Plataforma) && (cima /= Alcapao) && (baixo/= Alcapao)
+                              |otherwise = True
+                                                  where     cima = escolheBlocoPos  (x,y+1) mblocos
+                                                            baixo = escolheBlocoPos (x,y-1) mblocos
+validaEscadas :: Mapa -> Bool
+validaEscadas (Mapa _ _ mblocos) = all (`validaEscada` mblocos) (posicaoBloco mblocos)
 
+--7
+
+validaAl::Jogo -> Bool
+validaAl j1 = fst (tamanho (jogador j1)) <= largAl
+               where largAl = 1
 --8
 
 validaColecionaveis :: Jogo -> Bool -- extrai a posição de cada colecionável e verifica, com recurso à função blocoNaPosicao, se o bloco nessa posição é vazio, retornando True se tal acontecer para todos os colecionáveis
-validaColecionaveis  (Jogo (Mapa _ _ matriz) _ listac _ ) = 
-     all (\(colecionavel1, (xc,yc)) ->  blocoNaPosicao (xc,yc) matriz == Vazio) listac
+validaColecionaveis  (Jogo (Mapa _ _ matriz) _ listac _ ) =
+     all (\(colecionavel1, (xc,yc)) ->  escolheBlocoPos  (xc,yc) matriz == Vazio) listac
 
-blocoNaPosicao :: Posicao -> [[Bloco]] -> Bloco -- função que, após receber uma posição e uma matriz retorna qual o tipo de bloco nesta posição da matriz
-blocoNaPosicao (x,y) matriz = (matriz !! floor y) !! floor x
+escolheBlocoPos :: Posicao -> [[Bloco]] -> Bloco -- função que, após receber uma posição e uma matriz retorna qual o tipo de bloco nesta posição da matriz
+escolheBlocoPos  (x,y) matriz = (matriz !! floor y) !! floor x
 
 validaPosPersonagem :: Mapa -> [Personagem] -> Bool
-validaPosPersonagem  m1@(Mapa _ _ matriz) ((Personagem _ _ (x,y) _ _ _ _ _ _ _):ps) = (((blocoNaPosicao (x,y) matriz) == Vazio) && validaPosPersonagem m1 ps)
+validaPosPersonagem  m1@(Mapa _ _ matriz) ((Personagem _ _ (x,y) _ _ _ _ _ _ _):ps) = (((escolheBlocoPos  (x,y) matriz) == Vazio) && validaPosPersonagem m1 ps)
