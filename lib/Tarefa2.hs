@@ -14,7 +14,7 @@ import Data.List
 
 valida :: Jogo -> Bool
 valida jogo1@(Jogo mapa1 inimigos colecionaveis jogador ) =
-     validaMapa mapa1 && validaRessalto (jogador:inimigos) && validaPos jogador inimigos && validaNumP inimigos && validaVidaFantasma inimigos && validaColecionaveis jogo1 && validaPosPersonagem mapa1 (jogador:inimigos)
+     validaMapa mapa1 && validaRessalto (jogador:inimigos) && validaPos jogador inimigos && validaNumP inimigos && validaVidaFantasma inimigos && validaEscadas mapa1 && validaAl jogo1 && validaColecionaveis jogo1 && validaPosPersonagem mapa1 (jogador:inimigos)
 
 --1
 
@@ -69,4 +69,4 @@ escolheBlocoPos :: Posicao -> [[Bloco]] -> Bloco -- função que, após receber 
 escolheBlocoPos  (x,y) matriz = (matriz !! floor y) !! floor x
 
 validaPosPersonagem :: Mapa -> [Personagem] -> Bool
-validaPosPersonagem  m1@(Mapa _ _ matriz) ((Personagem _ _ (x,y) _ _ _ _ _ _ _):ps) = (((escolheBlocoPos  (x,y) matriz) == Vazio) && validaPosPersonagem m1 ps)
+validaPosPersonagem  m1@(Mapa _ _ matriz) ((Personagem _ _ (x,y) _ (l,a) _ _ _ _ _):ps) = (((escolheBlocoPos  (x,y+a/2) matriz) == Vazio) && validaPosPersonagem m1 ps)

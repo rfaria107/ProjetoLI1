@@ -39,27 +39,54 @@ morteInimigo i1@(Personagem velocidade Fantasma pos dir (c,l) esc ress vidas pon
 --3
                                                                                                                                                       
 aplicarGravidade :: Personagem -> Mapa -> Personagem
-aplicarGravidade p1@(Personagem (vx,vy) Jogador pos dir (c,l) esc ress vidas pon (n,z)) m1@(Mapa _ _ mblocos)     |not (colisaoBlocoPersonagem p1 (escolheBloco p1 m1)) = (Personagem (vx,(vy-(snd gravidade))) Jogador pos dir (c,l) esc ress vidas pon (n,z))
+aplicarGravidade p1@(Personagem (vx,vy) Jogador pos dir (c,l) esc ress vidas pon (n,z)) m1@(Mapa _ _ mblocos)     |not (colisaoBlocoPersonagem p1 (escolheBloco p1 m1)) = (Personagem (vx,vy+(snd gravidade)) Jogador pos dir (c,l) esc ress vidas pon (n,z))
                                                                                                                   |otherwise = p1
 --4
 
 aplicarDanoJogador :: Personagem -> Personagem -> Personagem -- p1 é o jogador e p2 o fantasma. Se a hitbox de ambos colidir o jogador perde uma vida.
-aplicarDanoJogador p1@(Personagem vel Jogador pos dir (c,l) esc ress vidas pon (n,z)) p2@(Personagem velocidade2 Fantasma pos2 dir2 (c2,l2) esc2 ress2 vidas2 pon2 (n2,z2))   |vidas2 >0 && colisaoHitbox (defineHitbox p1) (defineHitbox p2) = (Personagem vel Jogador pos dir (c,l) esc ress (vidas-1) pon (n,z))
+aplicarDanoJogador p1@(Personagem vel Jogador pos dir (c,l) esc ress vidas pon (n,z)) p2@(Personagem velocidade2 Fantasma pos2 dir2 (c2,l2) esc2 ress2 vidas2 pon2 (n2,z2))   |colisaoHitbox (defineHitbox p1) (defineHitbox p2) = (Personagem vel Jogador pos dir (c,l) esc ress (vidas-1) pon (n,z))
                                                                                                                                                                               |otherwise = p1
-
+--5
 
 pontosApanharMoeda :: Personagem -> Jogo -> Personagem
-pontosApanharMoeda p1@(Personagem vel Jogador (x,y) dir (c,l) esc ress vidas pon (n,z)) j1@(Jogo _ _ col _)     |any (==True) (map (colisaoHitbox (defineHitbox p1)) (hitboxesColecionaveis j1)) = Personagem vel Jogador (x,y) dir (c,l) esc ress vidas (pon+1) (n,z)
+pontosApanharMoeda p1@(Personagem vel Jogador (x,y) dir (c,l) esc ress vidas pon (n,z)) j1@(Jogo _ _ col _)     |any (==True) (map (colisaoHitbox (defineHitbox p1)) (hitboxesMoedas j1)) = Personagem vel Jogador (x,y) dir (c,l) esc ress vidas (pon+1) (n,z)
                                                                                                                 |otherwise = p1
+
+apanharMartelos :: Personagem -> Jogo -> Personagem
+apanharMartelos p1@(Personagem vel Jogador (x,y) dir (c,l) esc ress vidas pon (n,z)) j1@(Jogo _ _ col _)        |any (==True) (map (colisaoHitbox (defineHitbox p1)) (hitboxesMartelos j1)) = Personagem vel Jogador (x,y) dir (c,l) esc ress vidas pon (True,10)
+                                                                                                                |otherwise = p1
+                                                                                                                                                                                                                                
+desapareceColecionavel:: Personagem -> Jogo -> Jogo
+desapareceColecionavel p1 jogo1@(Jogo m i lc@((col,(x,y)):xs) j)        | colisaoHitbox (defineHitbox p1) (hitboxColecionavel (col,(x,y))) = desapareceColecionavel p1 (Jogo m i ((col, (-10,-10)):xs) j) 
+                                                                        | otherwise = desapareceColecionavel p1 (Jogo m i lc j)
 
 hitboxesColecionaveis :: Jogo -> [Hitbox]
 hitboxesColecionaveis (Jogo _ _ lc _) = case lc of
   [] -> []
   ((col, (x, y)):xs) -> map hitboxColecionavel lc
-    where
-      hitboxColecionavel :: (Colecionavel, Posicao) -> Hitbox
-      hitboxColecionavel (_, (x, y)) = ((x - 0.5, y - 0.5), (x + 0.5, y + 0.5))
+    
+hitboxColecionavel :: (Colecionavel, Posicao) -> Hitbox
+hitboxColecionavel (_, (x, y)) = ((x - 0.5, y - 0.5), (x + 0.5, y + 0.5))
 
+hitboxesMartelos :: Jogo -> [Hitbox]
+hitboxesMartelos (Jogo _ _ lc _) = case lc of
+  [] -> []
+  ((Martelo, (x, y)):xs) -> map hitboxColecionavel lc
+
+hitboxMartelo :: (Colecionavel, Posicao) -> Hitbox
+hitboxMartelo (Martelo, (x, y)) = ((x - 0.5, y - 0.5), (x + 0.5, y + 0.5))
+
+hitboxesMoedas :: Jogo -> [Hitbox]
+hitboxesMoedas (Jogo _ _ lc _) = case lc of
+  [] -> []
+  ((Moeda, (x, y)):xs) -> map hitboxColecionavel lc
+
+hitboxMoeda :: (Colecionavel, Posicao) -> Hitbox
+hitboxMoeda (Moeda, (x, y)) = ((x - 0.5, y - 0.5), (x + 0.5, y + 0.5))
+
+--6
+
+--movimentar o jogador
 moveJogador :: Personagem -> Personagem
 moveJogador j1@(Personagem (vx,vy) Jogador (x,y) dir (c,l) esc ress vidas pon (n,z))
                                                                                 |vx>0 = Personagem (vx,vy) Jogador (x+1,y) dir (c,l) esc ress vidas pon (n,z)

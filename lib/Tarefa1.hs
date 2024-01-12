@@ -39,7 +39,7 @@ posicaoBloco :: [[Bloco]] -> [(Posicao,Bloco)] -- atribui a cada bloco da matriz
 posicaoBloco mblocos = [((fromIntegral x, fromIntegral y),bloco) | (y,linhaBloco) <- zip [0..] mblocos, (x,bloco) <- zip [0..] linhaBloco]
 
 hitboxPlat :: (Posicao,Bloco) -> Hitbox 
-hitboxPlat ((x,y),bloco) = if bloco == Plataforma then ((x-0.5,y-0.5),(x+0.5,y+0.5)) else ((-10,-10),(-10,-10))
+hitboxPlat ((x,y),Plataforma) = ((x-0.5,y-0.5),(x+0.5,y+0.5))
 
 hitboxPlataformas :: [(Posicao,Bloco)]-> [Hitbox]
 hitboxPlataformas = map hitboxPlat
