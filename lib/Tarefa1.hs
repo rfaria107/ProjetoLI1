@@ -26,7 +26,7 @@ defineHitbox p = (ci,cs) -- Hitbox é definida pelo canto inferior esquerdo e ca
 
 colisaoHitbox :: Hitbox -> Hitbox -> Bool -- Função que verifica se duas hitboxes se sobrepõem
 colisaoHitbox ((x1,y1),(w1,z1)) ((x2,y2),(w2,z2))
-                                                      |x1 < x2 + w2 && x1 + w1 > x2 && y1 < y2 + z2 && y1+z1 > y2 = True
+                                                      |((x1 >= x2 && x1 <= w2) || (w1 >= x2 && w1 <= w2)) && ((y1 >= y2 && y1 <= z2) || (z1 >= y2 && z1 <= z2)) = True
                                                       |otherwise = False
 
 colisoesPersonagens :: Personagem -> Personagem -> Bool
@@ -50,7 +50,7 @@ colisaoBloco p1@(Personagem _ _ (x,y) _ _ _ _ _ _ _) plataformas = any (==True) 
 --versão que apenas verifica se o bloco abaixo do personagem é uma plataforma (útil noutras tarefas)
 
 escolheBloco :: Personagem -> Mapa -> Bloco
-escolheBloco p1@(Personagem _ _ (x,y) _ _ _ _ _ _ _) (Mapa _ _ mblocos) = (mblocos !! floor y) !! floor x
+escolheBloco p1@(Personagem _ _ (x,y) _ (l,a) _ _ _ _ _) (Mapa _ _ mblocos) = (mblocos !! floor (y+(a/2))) !! floor x
 
 colisaoBlocoPersonagem :: Personagem -> Bloco -> Bool
 colisaoBlocoPersonagem p1 b = colisaoHitbox (defineHitbox p1) (hitboxPlat ((fst (posicao p1),snd (posicao p1)+0.5),b)) 

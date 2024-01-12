@@ -32,7 +32,7 @@ aplicarDanoMartelo p1@(Personagem _ Jogador _ _ _ _ _ _ _ (True,_)) p2@(Personag
       |otherwise = p2
 --2
 
-morteInimigo :: Personagem -> Personagem
+morteInimigo :: Personagem -> Personagem -- envia o inimigo para uma posição fora da matriz de modo que este não interfira no resto do jogo.
 morteInimigo i1@(Personagem velocidade Fantasma pos dir (c,l) esc ress vidas pon (n,z))   |vidas == 0 = Personagem velocidade Fantasma (-10,-10) dir (c,l) esc ress vidas pon (n,z)
                                                                                           |otherwise = i1
 
