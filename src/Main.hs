@@ -36,7 +36,7 @@ comprimento = (-1920)
 
 --largura das peças do mapa
 l :: Float
-l = 1
+l = 96
 
 --Desenhar o Menu
 
@@ -44,10 +44,10 @@ desenhaMenu :: Imagens -> Picture
 desenhaMenu imagens = Translate 0 100 $ fromJust $ lookup "Menu" imagens 
 
 
-inimigo1 = Personagem (0,0) Fantasma (2,3) Este (1,1) False True 1 0 (False,0)
+inimigo1 = Personagem (0,0) Fantasma (2,2) Este (1,1) False True 1 0 (False,0)
 
 
-inimigo2 = Personagem (0,0) Fantasma (6,9) Oeste (1,1) False True 1 0 (False,0)
+inimigo2 = Personagem (0,0) Fantasma (6,5) Oeste (1,1) False True 1 0 (False,0)
 
 
 jogador1 = Personagem (0,0) Jogador (2,8) Oeste (0.5,0.5) False False 3 0 (False,0)
@@ -62,7 +62,7 @@ definejogo1 :: Jogo
 definejogo1 = Jogo m i c j
                 where   m = mapa1
                         i = [inimigo1,inimigo2]
-                        c = [(Moeda,(3,7)),(Martelo,(6,8))]
+                        c = [(Moeda,(15,2)),(Martelo,(6,8))]
                         j = jogador1
 
 xcentroMatriz = 10 
@@ -181,7 +181,7 @@ carregarImagens = do
                         ("MarioEsquerda", scale 1 1 $ marioesquerda),
                         ("FundoVitoria", scale 1 1 $ fundovitoria),
                         ("FundoGameOver", scale 1 1 $ fundogameover),
-                        ("LetrasMenu", scale 1 1 $ letrasmenu),
+                        ("LetrasMenu", scale 1 1 $ letrasmenu)
                         ]
         
         return imagens

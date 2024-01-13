@@ -32,7 +32,7 @@ velocidadeJogador j1@(Personagem (vx,vy) Jogador pos dir (c,l) esc ress vidas po
                         velocidade = (vx,vy-0.1)
                     }
                     | acao == Just Descer = j1 {
-                        velocidade = (vx,vy-0.1)
+                        velocidade = (vx,vy+0.1)
                     }
                     | acao == Just Parar = j1 {
                         velocidade = (0,0)
