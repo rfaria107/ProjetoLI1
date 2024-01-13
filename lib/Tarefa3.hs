@@ -14,8 +14,8 @@ import Graphics.Gloss (Picture (Blank))
 
 movimenta :: Semente -> Tempo -> Jogo -> Jogo
 movimenta seed tempo jogo1 =  jogo1 {
-      jogador = aplicarGravidade (moveJogador $ pontosApanharMoeda (jogador jogo1) jogo1) (mapa jogo1)--,
-      --inimigos = map (aplicarDanoMartelo (jogador jogo1)) (map (morteInimigo) (inimigos jogo1))
+      jogador = aplicarGravidade (moveJogador $ pontosApanharMoeda (jogador jogo1) jogo1) (mapa jogo1),
+      inimigos = map (aplicarDanoMartelo (jogador jogo1)) (map (morteInimigo) (inimigos jogo1))
 }
 
 --1
@@ -40,7 +40,7 @@ morteInimigo i1@(Personagem velocidade Fantasma pos dir (c,l) esc ress vidas pon
 --3
                                                                                                                                                       
 aplicarGravidade :: Personagem -> Mapa -> Personagem
-aplicarGravidade p1@(Personagem (vx,vy) Jogador pos dir (c,l) esc ress vidas pon (n,z)) m1@(Mapa _ _ mblocos)     |not (colisaoBlocoPersonagem p1 (escolheBloco p1 m1)) = (Personagem (vx,vy+(0.05)) Jogador pos dir (c,l) esc ress vidas pon (n,z))
+aplicarGravidade p1@(Personagem (vx,vy) Jogador pos dir (c,l) esc ress vidas pon (n,z)) m1@(Mapa _ _ mblocos)     |not (colisaoBlocoPersonagem p1 (escolheBloco p1 m1)) && not (colisaoPersonagemEscada2 p1 m1)  = (Personagem (vx,vy+(10)) Jogador pos dir (c,l) esc ress vidas pon (n,z))
                                                                                                                   |otherwise = p1
 --4
 
@@ -105,8 +105,8 @@ hitboxMoeda (Moeda, (x, y)) = ((x - 0.5, y - 0.5), (x + 0.5, y + 0.5))
 
 moveJogador :: Personagem -> Personagem
 moveJogador j1@(Personagem (vx,vy) Jogador (x,y) dir (c,l) esc ress vidas pon (n,z))
-                                                                                |vx>0 = Personagem (vx,vy) Jogador (x+1,y) dir (c,l) esc ress vidas pon (n,z)
-                                                                                |vx<0 = Personagem (vx,vy) Jogador (x-1,y) dir (c,l) esc ress vidas pon (n,z)
-                                                                                |vy>0 = Personagem (vx,0) Jogador (x,y+1) dir (c,l) esc ress vidas pon (n,z)
-                                                                                |vy<0 = Personagem (vx,0) Jogador (x,y-1) dir (c,l) esc ress vidas pon (n,z)
+                                                                                |vx>0 = Personagem (vx,vy) Jogador (x+0.1,y) dir (c,l) esc ress vidas pon (n,z)
+                                                                                |vx<0 = Personagem (vx,vy) Jogador (x-0.1,y) dir (c,l) esc ress vidas pon (n,z)
+                                                                                |vy>0 = Personagem (vx,0) Jogador (x,y+0.05) dir (c,l) esc ress vidas pon (n,z)
+                                                                                |vy<0 = Personagem (vx,0) Jogador (x,y-0.5) dir (c,l) esc ress vidas pon (n,z)
                                                                                 |otherwise = j1

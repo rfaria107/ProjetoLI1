@@ -9,8 +9,7 @@ import Tarefa1
 import Tarefa2
 import Tarefa3
 import Tarefa4
-import GHC.Float (float2Double, double2Float)
-
+import GHC.Float (float2Double, double2Float, float2Int, int2Double)
 
 type Images = [Picture]
 type Imagens = [(String,Picture)]
@@ -30,28 +29,31 @@ hitboxAlturaO = 100
 
 
 altura :: Float
-altura =  525
+altura =  1080
 
 comprimento :: Float 
-comprimento = (-940) 
+comprimento = (-1920) 
 
-l :: Int 
-l = 10
+--largura das peças do mapa
+l :: Float
+l = 1
+
+--Desenhar o Menu
 
 desenhaMenu :: Imagens -> Picture
 desenhaMenu imagens = Translate 0 100 $ fromJust $ lookup "Menu" imagens 
 
 
-inimigo1 = Personagem (0,0) Fantasma (50,-35.5) Este (1,1) False True 1 0 (False,0)
+inimigo1 = Personagem (0,0) Fantasma (2,3) Este (1,1) False True 1 0 (False,0)
 
 
-inimigo2 = Personagem (0,0) Fantasma (6,10) Oeste (1,1) False True 1 0 (False,0)
+inimigo2 = Personagem (0,0) Fantasma (6,9) Oeste (1,1) False True 1 0 (False,0)
 
 
-jogador1 = Personagem (0,0) Jogador (2,6) Oeste (1,1) False False 3 0 (False,0)
+jogador1 = Personagem (0,0) Jogador (2,8) Oeste (0.5,0.5) False False 3 0 (False,0)
 
 janela :: Display
-janela = InWindow "janela" (1920,1080) (0,0)
+janela = InWindow "Moon Kong" (1920,1080) (0,0)
 
 fr :: Int
 fr = 60
@@ -62,12 +64,18 @@ definejogo1 = Jogo m i c j
                         i = [inimigo1,inimigo2]
                         c = [(Moeda,(3,7)),(Martelo,(6,8))]
                         j = jogador1
-traduzPosicao :: Posicao -> Posicao -- traduz uma posicao da lógica da matriz para esta ser utilizada no gloss
-traduzPosicao (x,y) = (x*1920/20, ( - y * 1080 /10))
 
+xcentroMatriz = 10 
+ycentroMatriz = 5
+
+traduzPosicaoX :: Double -> Float -- traduz uma posicao da lógica da matriz para esta ser utilizada no gloss
+traduzPosicaoX x = double2Float (x - fromIntegral xcentroMatriz) * (1920 / 20)
+
+traduzPosicaoY :: Double -> Float -- traduz uma posicao da lógica da matriz para esta ser utilizada no gloss
+traduzPosicaoY y = - double2Float (y - fromIntegral ycentroMatriz) * (1080 / 10)
 
 getMapa :: Jogo -> Mapa
-getMapa j = mapa1
+getMapa j = mapa j
 
 estadoInicial :: Imagens -> Jogo
 estadoInicial imagens = definejogo1
@@ -81,80 +89,99 @@ reageEvento (EventKey (SpecialKey KeyRight) Down _ _) definejogo1 = atualiza [No
 reageEvento (EventKey (SpecialKey KeyRight) Up _ _) definejogo1 = atualiza [Nothing, Nothing] (Just Parar) definejogo1
 --escadas
 reageEvento (EventKey (SpecialKey KeyUp) Down _ _) definejogo1 = if colisaoPersonagemEscada (jogador definejogo1) definejogo1 then atualiza [Nothing,Nothing] (Just Subir) definejogo1 else definejogo1
+reageEvento (EventKey (SpecialKey KeyUp) Up _ _) definejogo1 = atualiza [Nothing, Nothing] (Just Parar) definejogo1
+reageEvento (EventKey (SpecialKey KeyDown) Down _ _) definejogo1 = if colisaoPersonagemEscada (jogador definejogo1) definejogo1 then atualiza [Nothing,Nothing] (Just Descer) definejogo1 else definejogo1
+reageEvento (EventKey (SpecialKey KeyDown) Up _ _) definejogo1 = atualiza [Nothing, Nothing] (Just Parar) definejogo1
 reageEvento _ j = j 
 
-
+ 
 reageTempo :: Float -> Jogo -> Jogo
 reageTempo dt definejogo1 = movimenta 1 (float2Double dt) $ definejogo1
 
 desenhaJogador :: Imagens -> Personagem -> Picture
-desenhaJogador images j@(Personagem _ Jogador pos direcao tamanho _ _ _ _ _) =
-    Pictures [ Translate ((double2Float (fst (traduzPosicao pos))) * double2Float (snd (traduzPosicao pos))) (double2Float (snd (traduzPosicao pos) * realToFrac l)) $ Scale 1 1 $ fromJust $ lookup "Jogador" images , defineHitboxJ j]
+desenhaJogador images j@(Personagem _ Jogador (x,y) direcao tamanho _ _ _ _ _) =
+    Pictures [ Translate (traduzPosicaoX x) (traduzPosicaoY y) $ Scale 1 1 $ fromJust $ lookup "ArmadoEsquerda" images , defineHitboxJ j]
 
-desenhaObjetivo :: Imagens -> [(Colecionavel, Posicao)] -> Picture
+desenhaObjetivo :: Imagens -> [(Colecionavel, (Double,Double))] -> Picture
 desenhaObjetivo _ [] = blank
-desenhaObjetivo images (w@(Moeda, pos):t) = Pictures [Translate (double2Float (fst (traduzPosicao pos)) * realToFrac l) (realToFrac (snd (traduzPosicao pos)) * realToFrac l) $ fromJust $ lookup "Peach" images, defineHitboxO w ]
+desenhaObjetivo images (w@(Moeda, (x,y)):t) = Pictures [Translate ((traduzPosicaoX x)) ((traduzPosicaoY y)) $ fromJust $ lookup "Peach" images, defineHitboxO w ]
 desenhaObjetivo images ((_, _):t) = desenhaObjetivo images t
 
 desenhaInimigos :: Imagens -> [Personagem] -> Picture 
 desenhaInimigos _ [] = blank
-desenhaInimigos images (i@(Personagem _ Fantasma pos direcao tamanho _ _ _ _ _):t) =  Pictures [ Translate (double2Float (fst (traduzPosicao pos)) * realToFrac l) (double2Float (snd (traduzPosicao pos))* realToFrac l) $ Scale 1 1 $ fromJust $ lookup "Fantasma" images]
-desenhaInimigos images (h:t) = desenhaInimigos images t 
+desenhaInimigos images (i@(Personagem _ Fantasma (x,y) direcao tamanho _ _ _ _ _):t) =  Pictures [ Translate ((traduzPosicaoX x)) ((traduzPosicaoY y)) $ Scale 1 1 $ fromJust $ lookup "Fantasma" images, desenhaInimigos images t]
 
 
 defineHitboxJ :: Personagem -> Picture
-defineHitboxJ (Personagem _ Jogador pos direcao tamanho _ _ _ _ _) = Color green $ Translate (double2Float (fst (traduzPosicao pos)) * realToFrac l) (double2Float (snd (traduzPosicao pos)) * realToFrac l) $ rectangleWire hitboxLarguraj hitboxAlturaj
+defineHitboxJ (Personagem _ Jogador (x,y) direcao tamanho _ _ _ _ _) = Color green $ Translate ((traduzPosicaoX x)) ((traduzPosicaoY y)) $ rectangleWire hitboxLarguraj hitboxAlturaj
 
-defineHitboxO :: (Colecionavel,Posicao) -> Picture 
-defineHitboxO (Moeda,pos) = Color green $ Translate (double2Float (fst (traduzPosicao pos)) * realToFrac l) (double2Float (snd (traduzPosicao pos)) * realToFrac l) $ rectangleWire hitboxLarguraO hitboxAlturaO
+defineHitboxO :: (Colecionavel,(Double,Double)) -> Picture 
+defineHitboxO (Moeda,(x,y)) = Color green $ Translate ((traduzPosicaoX x)) ((traduzPosicaoY y)) $ rectangleWire hitboxLarguraO hitboxAlturaO
 
-fazMatriz :: [[Bloco]] -> Int -> [[(Bloco,(Int,Int))]]
+
+
+--mapa 
+
+fazMatriz :: [[Bloco]] -> Double -> [[(Bloco,(Double,Double))]]
 fazMatriz [] x = []
-fazMatriz mapa@((h:t)) y = fazLinha (h) (-45) y : fazMatriz t (y+10)
+fazMatriz mapa@((h:t)) y = fazLinha h 0 y : fazMatriz t (y+1)
 
-fazLinha :: [Bloco] -> Int -> Int -> [(Bloco,(Int,Int))]
+fazLinha :: [Bloco] -> Double -> Double -> [(Bloco,(Double,Double))]
 fazLinha [] _ _ = []
-fazLinha (bloco:rblocos) x y = (bloco, (x,y)) : fazLinha rblocos (x+l) y
+fazLinha (bloco:rblocos) x y = (bloco, (x,y)) : fazLinha rblocos (x+1) y
 
-desenhaMapa :: EstadoMapa -> [[(Bloco,(Int,Int))]] -> Picture
+desenhaMapa :: EstadoMapa -> [[(Bloco,(Double,Double))]] -> Picture
 desenhaMapa _ [] = blank
 desenhaMapa e@((Jogo mapa _ _ _), images) (h:t) = pictures [desenhaLinhaMapa images h, desenhaMapa e t]
 
-desenhaLinhaMapa :: Imagens -> [(Bloco, (Int,Int))] -> Picture
+desenhaLinhaMapa :: Imagens -> [(Bloco, (Double,Double))] -> Picture
 desenhaLinhaMapa _ [] = blank
 desenhaLinhaMapa images ((h,(x,y)):t) = case h of 
-                Plataforma -> Pictures [Translate ((fromIntegral x)*(realToFrac l)) (-(fromIntegral y)*(realToFrac l)) $ Scale 0.3 0.3 $ fromJust $ lookup "Plataforma" images, desenhaLinhaMapa images t ]
-                Escada -> Pictures [Translate ((fromIntegral x)*(realToFrac l)) (-(fromIntegral y)*(realToFrac l)) $ Scale  2.5 2.5 $ fromJust $ lookup "Escada" images, desenhaLinhaMapa images t ]
-                Vazio -> Pictures [Translate ((fromIntegral x)*(realToFrac l)) (-(fromIntegral y)*(realToFrac l)) $ Scale 0.3 0.3 $ fromJust $ lookup "Vazio" images, desenhaLinhaMapa images t ]
-                Alcapao -> Pictures [Translate ((fromIntegral x)*(realToFrac l)) (-(fromIntegral y)*(realToFrac l)) $ Scale 1 1 $ fromJust $ lookup "Alcapao" images , desenhaLinhaMapa images t ]
+                Plataforma -> Pictures [Translate (traduzPosicaoX (x)) (traduzPosicaoY (y)) $ Scale 1 1 $ fromJust $ lookup "Plataforma" images, desenhaLinhaMapa images t ]
+                Escada -> Pictures [Translate ((traduzPosicaoX ( x))) ((traduzPosicaoY ( y))) $ Scale  2.5 2.5 $ fromJust $ lookup "Escada" images, desenhaLinhaMapa images t ]
+                Vazio -> Pictures [Translate ((traduzPosicaoX ( x))) ((traduzPosicaoY ( y))) $ Scale 0.3 0.3 $ fromJust $ lookup "Vazio" images, desenhaLinhaMapa images t ]
+                Alcapao -> Pictures [Translate ((traduzPosicaoX ( x))) ((traduzPosicaoY ( y))) $ Scale 1 1 $ fromJust $ lookup "Alcapao" images , desenhaLinhaMapa images t ]
 
 
 desenhaEstado :: Imagens -> Jogo -> Picture 
 desenhaEstado images jogo@(Jogo mapa@(Mapa (posi,dir) posf blocos) inimigos colecionaveis jogador)   
-                        = pictures [Color black $ rectangleSolid 1200 900,
-                        desenhaMapa (jogo, images) (fazMatriz blocos (-20)),
+                        = pictures [ fromJust (lookup "Fundo" images),
+                        desenhaMapa (jogo, images) (fazMatriz blocos 0),
                         desenhaJogador images jogador,
                         desenhaObjetivo images colecionaveis,
                         desenhaInimigos images inimigos]
 
-
 carregarImagens :: IO Imagens
 carregarImagens = do
-        plataforma <- loadBMP "../2023li1g086/resources/block.bmp"
+        plataforma <- loadBMP "../2023li1g086/resources/blocolua.bmp"
         escadas <- loadBMP "../2023li1g086/resources/Ladder.bmp"
         alcapao <- loadBMP "../2023li1g086/resources/alcapao.bmp"
-        jogador <- loadBMP "../2023li1g086/resources/player1.bmp"
         objetivo <- loadBMP "../2023li1g086/resources/goal.bmp"
         fantasma <- loadBMP "../2023li1g086/resources/Fantasma.bmp"
-        menuinicial <- loadBMP "../2023li1g086/resources/menukong.bmp"
-        let imagens = [ ("Plataforma", scale 0.43 0.2 $ plataforma),
+        menuinicial <- loadBMP "../2023li1g086/resources/fundomenu.bmp"
+        fundo <- loadBMP "../2023li1g086/resources/fundolua.bmp"
+        armadodireita <- loadBMP "../2023li1g086/resources/armadodireita.bmp"
+        armadoesquerda <- loadBMP "../2023li1g086/resources/armadoesquerda.bmp"
+        mariodireita <- loadBMP "../2023li1g086/resources/mariodireita.bmp"
+        marioesquerda <- loadBMP "../2023li1g086/resources/marioesquerda.bmp"
+        fundovitoria <- loadBMP "../2023li1g086/resources/fundovitoria.bmp"
+        fundogameover <- loadBMP "../2023li1g086/resources/gameover.bmp"
+        letrasmenu <- loadBMP "../2023li1g086/resources/letrasmenu.bmp"
+        let imagens = [ ("Plataforma", scale 0.5 0.5 $ plataforma),
                         ("Escada", scale 0.43 0.5 $ escadas),
                         ("Alcapao", scale 0.52 0.36 $ alcapao),
                         ("Vazio", Blank),
-                        ("Jogador", scale 0.33 0.33 $ jogador),
                         ("Peach", scale 0.2 0.2 $ objetivo),
                         ("Fantasma", scale 0.2 0.2 $ fantasma),
-                        ("Menu", scale 0.2 0.2 $ menuinicial)
+                        ("Menu", scale 0.2 0.2 $ menuinicial),
+                        ("Fundo", scale 1 1 $ fundo),
+                        ("ArmadoDireita", scale 1 1 $ armadodireita),
+                        ("ArmadoEsquerda", scale 1 1 $ armadoesquerda),
+                        ("MarioDireita", scale 1 1 $ mariodireita),
+                        ("MarioEsquerda", scale 1 1 $ marioesquerda),
+                        ("FundoVitoria", scale 1 1 $ fundovitoria),
+                        ("FundoGameOver", scale 1 1 $ fundogameover),
+                        ("LetrasMenu", scale 1 1 $ letrasmenu),
                         ]
         
         return imagens
@@ -162,7 +189,7 @@ carregarImagens = do
 main = do 
         images <- carregarImagens 
         play 
-                janela                         
+                FullScreen                        
                 black               
                 fr                      
                 (estadoInicial images)

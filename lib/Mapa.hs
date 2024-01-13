@@ -11,16 +11,16 @@ module Mapa where
 import LI12324
 
 -- | Estrutura do primeiro mapa
-mapa1 = Mapa ((0.5, 5.5), Oeste) (0.5, 17)
+mapa1 = Mapa ((2, 9), Oeste) (0.5, 17)
         [[p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p]
         ,[v, v, v, v, v, v, v, v, v, v, v, v, v, v, v, v, v, v, v, v]
         ,[v, v, v, v, v, v, v, v, v, v, v, v, v, v, v, v, v, v, v, v]
         ,[p, p, a, p, v, p, p, p, p, p, p, a, p, v, p, p, p, p, p, p]
-        ,[v, v, v, v, v, v, v, v, e, v, v, v, v, v, v, v, v, e, v, p]
-        ,[v, v, e, v, v, v, v, v, e, v, v, v, v, v, v, v, v, e, v, p]
+        ,[v, v, v, v, v, v, v, v, e, v, v, v, v, v, v, v, v, e, v, v]
+        ,[v, v, e, v, v, v, v, v, e, v, v, v, v, v, v, v, v, e, v, v]
         ,[p, p, p, a, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p]
-        ,[v, v, v, v, v, v, v, e, v, v, v, v, v, v, v, v, v, v, v, v]
-        ,[v, v, v, v, v, v, v, e, v, v, v, v, v, v, v, v, v, v, v, v]
+        ,[v, v, v, v, v, v, v, e, v, e, v, v, v, v, v, v, v, v, v, v]
+        ,[v, v, v, v, v, v, v, e, v, e, v, v, v, v, v, v, v, v, v, v]
         ,[p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p, p]
         ]
         where   p = Plataforma

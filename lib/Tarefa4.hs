@@ -20,19 +20,19 @@ atualiza acoesinimigos acao jogo1 = jogo1 {
 velocidadeJogador :: Personagem -> Maybe Acao -> Personagem
 velocidadeJogador j1@(Personagem (vx,vy) Jogador pos dir (c,l) esc ress vidas pon (n,z)) acao
                     | acao == Just Saltar = j1 {
-                        velocidade = (vx,vy+1)
+                        velocidade = (vx,vy-0.1)
                     }
                     | acao == Just AndarDireita = j1 {
-                        velocidade = (1,vy)
+                        velocidade = (0.1,vy)
                     }
                     | acao == Just AndarEsquerda = j1 {
-                        velocidade = (-1,vy)
+                        velocidade = (-0.1,vy)
                     }
                     | acao == Just Subir = j1 {
-                        velocidade = (vx,vy+1)
+                        velocidade = (vx,vy-0.1)
                     }
                     | acao == Just Descer = j1 {
-                        velocidade = (vx,vy-1)
+                        velocidade = (vx,vy-0.1)
                     }
                     | acao == Just Parar = j1 {
                         velocidade = (0,0)
@@ -43,7 +43,7 @@ velocidadeJogador j1@(Personagem (vx,vy) Jogador pos dir (c,l) esc ress vidas po
 moverinimigos :: [Personagem] -> [Maybe Acao] -> [Personagem]
 moverinimigos (inimigo1@(Personagem (vx,vy) Fantasma _ _ _ _ _ _ _ _):is) (acao:as)
                                     | acao == Just Saltar = inimigo1 {
-                                        velocidade = (vx,vy+1)
+                                        velocidade = (vx,vy-1)
                                     } : moverinimigos is as
                                     | acao == Just AndarDireita = inimigo1 {
                                         velocidade = (1,vy)
@@ -52,10 +52,10 @@ moverinimigos (inimigo1@(Personagem (vx,vy) Fantasma _ _ _ _ _ _ _ _):is) (acao:
                                         velocidade = (-1,vy)
                                     } : moverinimigos is as
                                     | acao == Just Subir = inimigo1 {
-                                        velocidade = (vx,vy+1)
+                                        velocidade = (vx,vy-1)
                                     } : moverinimigos is as
                                     | acao == Just Descer = inimigo1 {
-                                        velocidade = (vx,vy-1)
+                                        velocidade = (vx,vy+1)
                                     } : moverinimigos is as
                                     | acao == Just Parar = inimigo1 {
                                         velocidade = (0,0)

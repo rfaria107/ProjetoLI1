@@ -52,13 +52,18 @@ colisaoBloco p1@(Personagem _ _ (x,y) _ _ _ _ _ _ _) plataformas = any (==True) 
 escolheBloco :: Personagem -> Mapa -> Bloco -- escolhe o bloco abaixo da personagem (útil para colisões com alçapão)
 escolheBloco p1@(Personagem _ _ (x,y) _ (l,a) _ _ _ _ _) (Mapa _ _ mblocos) = (mblocos !! floor (y+a/2)) !! floor x
 
-colisaoBlocoPersonagem :: Personagem -> Bloco -> Bool
+colisaoBlocoPersonagem :: Personagem -> Bloco -> Bool -- verifica se a persongem está em cima de uma plataforma
 colisaoBlocoPersonagem p1 b = colisaoHitbox (defineHitbox p1) (hitboxPlat ((fst (posicao p1),snd (posicao p1)+0.5),b)) 
 
 escolheBlocoPos :: Posicao -> [[Bloco]] -> Bloco -- função que, após receber uma posição e uma matriz retorna qual o tipo de bloco nesta posição da matriz
 escolheBlocoPos  (x,y) matriz = (matriz !! floor y) !! floor x
 
-colisaoPersonagemEscada :: Personagem -> Jogo -> Bool
+colisaoPersonagemEscada :: Personagem -> Jogo -> Bool -- verifica se o personagem está em escada
 colisaoPersonagemEscada p1 j1@(Jogo (Mapa _ _ mblocos) _ _ _)
+                                                |escolheBlocoPos (posicao p1) mblocos == Escada = True
+                                                |otherwise = False
+--versão com mapa em vez de jogo
+colisaoPersonagemEscada2 :: Personagem -> Mapa -> Bool
+colisaoPersonagemEscada2 p1 (Mapa _ _ mblocos)
                                                 |escolheBlocoPos (posicao p1) mblocos == Escada = True
                                                 |otherwise = False
