@@ -20,7 +20,7 @@ atualiza acoesinimigos acao jogo1 = jogo1 {
 velocidadeJogador :: Personagem -> Maybe Acao -> Personagem
 velocidadeJogador j1@(Personagem (vx,vy) Jogador pos dir (c,l) esc ress vidas pon (n,z)) acao
                     | acao == Just Saltar = j1 {
-                        velocidade = (vx,vy-0.1)
+                        velocidade = (vx,vy-0.5)
                     }
                     | acao == Just AndarDireita = j1 {
                         velocidade = (0.1,vy)

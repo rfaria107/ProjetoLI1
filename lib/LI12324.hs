@@ -109,14 +109,7 @@ data Jogo =
     , colecionaveis :: [(Colecionavel, Posicao)] -- ^ lista de colecionaveis espalhados pelo mapa
     , jogador       :: Personagem -- ^ o jogador
     }
-
-data EstadoJogo =
-            Estado
-                {
-                  estado :: EstadoJogo
-                  , jogo :: Jogo
-                }
-
+    
 -- | Valor inicial que determina a sequência de números pseudo-aleatórios.
 type Semente = Int
 

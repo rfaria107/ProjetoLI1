@@ -14,6 +14,16 @@ import GHC.Float (float2Double, double2Float, float2Int, int2Double)
 type Images = [Picture]
 type Imagens = [(String,Picture)]
 type EstadoMapa = (Jogo, Imagens)
+data World = 
+        World {
+                menu :: Menu,
+                jogo :: Jogo,
+                gameover :: Menu,
+                vitoria :: Menu,
+                menuatual :: String
+                }
+
+data Menu = Menu Int | GameOver Int | Vitoria Int
 
 hitboxLarguraj :: Float
 hitboxLarguraj = 70
@@ -40,23 +50,39 @@ l = 96
 
 --Desenhar o Menu
 
-desenhaMenu :: Imagens -> Picture
-desenhaMenu imagens = Translate 0 100 $ fromJust $ lookup "Menu" imagens 
+desenhaMenu :: Menu -> Imagens -> Picture
+desenhaMenu (Menu menu1) images = Scale 3 3 $ Translate 0 0 $ fromJust $ lookup "Menu" images 
+
+desenhawin :: Menu -> Imagens -> Picture
+desenhawin (Menu menu1) images = Translate 0 100 $ fromJust $ lookup "FundoVitoria" images 
+
+desenhalose :: Menu -> Imagens -> Picture
+desenhalose (Menu menu1) images = Translate 0 100 $ fromJust $ lookup "FundoGameOver" images 
 
 
 inimigo1 = Personagem (0,0) Fantasma (2,2) Este (1,1) False True 1 0 (False,0)
 
 
-inimigo2 = Personagem (0,0) Fantasma (6,5) Oeste (1,1) False True 1 0 (False,0)
+inimigo2 = Personagem (0,0) Fantasma (6,5.5) Oeste (1,1) False True 1 0 (False,0)
 
 
 jogador1 = Personagem (0,0) Jogador (2,8) Oeste (0.5,0.5) False False 3 0 (False,0)
 
+--não utilizado
 janela :: Display
 janela = InWindow "Moon Kong" (1920,1080) (0,0)
 
 fr :: Int
 fr = 60
+
+defineMenu1 :: Menu
+defineMenu1 = Menu 1
+
+menuvitoria1 :: Menu
+menuvitoria1 = Menu 2
+
+menugameover1 :: Menu
+menugameover1 = Menu 3
 
 definejogo1 :: Jogo
 definejogo1 = Jogo m i c j
@@ -64,6 +90,9 @@ definejogo1 = Jogo m i c j
                         i = [inimigo1,inimigo2]
                         c = [(Moeda,(15,2)),(Martelo,(6,8))]
                         j = jogador1
+
+mundo1 :: World
+mundo1 = World defineMenu1 definejogo1 menugameover1 menuvitoria1 "nomenu"
 
 xcentroMatriz = 10 
 ycentroMatriz = 5
@@ -77,46 +106,46 @@ traduzPosicaoY y = - double2Float (y - fromIntegral ycentroMatriz) * (1080 / 10)
 getMapa :: Jogo -> Mapa
 getMapa j = mapa j
 
-estadoInicial :: Imagens -> Jogo
-estadoInicial imagens = definejogo1
+estadoInicial :: Imagens -> World
+estadoInicial imagens = World defineMenu1 definejogo1 menuvitoria1 menugameover1 "nomenu"
 
-reageEvento :: Event -> Jogo -> Jogo
-reageEvento (EventKey (SpecialKey KeyEnter) Down _ _) menu = definejogo1
-reageEvento (EventKey (SpecialKey KeySpace) Down _ _) definejogo1 = atualiza [Nothing, Nothing] (Just Saltar) definejogo1
-reageEvento (EventKey (SpecialKey KeyLeft) Down _ _) definejogo1 = atualiza [Nothing, Nothing] (Just AndarEsquerda) definejogo1
-reageEvento (EventKey (SpecialKey KeyLeft) Up _ _) definejogo1 = atualiza [Nothing, Nothing] (Just Parar) definejogo1
-reageEvento (EventKey (SpecialKey KeyRight) Down _ _) definejogo1 = atualiza [Nothing, Nothing] (Just AndarDireita) definejogo1
-reageEvento (EventKey (SpecialKey KeyRight) Up _ _) definejogo1 = atualiza [Nothing, Nothing] (Just Parar) definejogo1
+reageEvento :: Event -> World -> World
+reageEvento (EventKey (SpecialKey KeyEnter) Down _ _) mundo1 = mundo1 { menuatual = "jogo"}
+reageEvento (EventKey (SpecialKey KeySpace) Down _ _) mundo1 =  mundo1 { jogo = (atualiza [Nothing, Nothing] (Just Saltar) (jogo mundo1))}
+reageEvento (EventKey (SpecialKey KeyLeft) Down _ _) mundo1 = mundo1 { jogo = (atualiza [Nothing, Nothing] (Just AndarEsquerda) (jogo mundo1)) }
+reageEvento (EventKey (SpecialKey KeyLeft) Up _ _) mundo1 = mundo1 { jogo = (atualiza [Nothing, Nothing] (Just Parar) (jogo mundo1)) }
+reageEvento (EventKey (SpecialKey KeyRight) Down _ _) mundo1 = mundo1 { jogo =  (atualiza [Nothing, Nothing] (Just AndarDireita) (jogo mundo1)) }
+reageEvento (EventKey (SpecialKey KeyRight) Up _ _) mundo1 = mundo1 { jogo = (atualiza [Nothing, Nothing] (Just Parar) (jogo mundo1)) }
 --escadas
-reageEvento (EventKey (SpecialKey KeyUp) Down _ _) definejogo1 = if colisaoPersonagemEscada (jogador definejogo1) definejogo1 then atualiza [Nothing,Nothing] (Just Subir) definejogo1 else definejogo1
-reageEvento (EventKey (SpecialKey KeyUp) Up _ _) definejogo1 = atualiza [Nothing, Nothing] (Just Parar) definejogo1
-reageEvento (EventKey (SpecialKey KeyDown) Down _ _) definejogo1 = if colisaoPersonagemEscada (jogador definejogo1) definejogo1 then atualiza [Nothing,Nothing] (Just Descer) definejogo1 else definejogo1
-reageEvento (EventKey (SpecialKey KeyDown) Up _ _) definejogo1 = atualiza [Nothing, Nothing] (Just Parar) definejogo1
-reageEvento _ j = j 
+reageEvento (EventKey (SpecialKey KeyUp) Down _ _) (mundo1) = if colisaoPersonagemEscada (jogador (jogo mundo1)) (jogo mundo1) then mundo1 { jogo = (atualiza [Nothing,Nothing] (Just Subir) (jogo mundo1)) } else mundo1 {jogo = (jogo mundo1)}
+reageEvento (EventKey (SpecialKey KeyUp) Up _ _) (mundo1) =  mundo1 { jogo = (atualiza [Nothing, Nothing] (Just Parar) (jogo mundo1))}
+reageEvento (EventKey (SpecialKey KeyDown) Down _ _) (mundo1) = if colisaoPersonagemEscada (jogador (jogo mundo1)) (jogo mundo1) then mundo1 { jogo = (atualiza [Nothing,Nothing] (Just Descer) (jogo mundo1)) } else mundo1 {jogo = (jogo mundo1)}
+reageEvento (EventKey (SpecialKey KeyDown) Up _ _) (mundo1) = mundo1 { jogo = (atualiza [Nothing, Nothing] (Just Parar) (jogo mundo1))}
+reageEvento _ mundo1 = mundo1  
 
  
-reageTempo :: Float -> Jogo -> Jogo
-reageTempo dt definejogo1 = movimenta 1 (float2Double dt) $ definejogo1
+reageTempo :: Float -> World -> World
+reageTempo dt mundo1 = mundo1 { jogo = movimenta 1 (float2Double dt) $ (jogo mundo1) }
 
 desenhaJogador :: Imagens -> Personagem -> Picture
 desenhaJogador images j@(Personagem _ Jogador (x,y) direcao tamanho _ _ _ _ _) =
-    Pictures [ Translate (traduzPosicaoX x) (traduzPosicaoY y) $ Scale 1 1 $ fromJust $ lookup "ArmadoEsquerda" images , defineHitboxJ j]
+    Pictures [ Translate (traduzPosicaoX x) (traduzPosicaoY y) $ Scale 1 1 $ fromJust $ lookup "MarioDireita" images , defineHitboxJ j]
 
 desenhaObjetivo :: Imagens -> [(Colecionavel, (Double,Double))] -> Picture
 desenhaObjetivo _ [] = blank
-desenhaObjetivo images (w@(Moeda, (x,y)):t) = Pictures [Translate ((traduzPosicaoX x)) ((traduzPosicaoY y)) $ fromJust $ lookup "Peach" images, defineHitboxO w ]
+desenhaObjetivo images (w@(Moeda, (x,y)):t) = Pictures [Translate (traduzPosicaoX x) (traduzPosicaoY y) $ fromJust $ lookup "Peach" images, defineHitboxO w ]
 desenhaObjetivo images ((_, _):t) = desenhaObjetivo images t
 
 desenhaInimigos :: Imagens -> [Personagem] -> Picture 
 desenhaInimigos _ [] = blank
-desenhaInimigos images (i@(Personagem _ Fantasma (x,y) direcao tamanho _ _ _ _ _):t) =  Pictures [ Translate ((traduzPosicaoX x)) ((traduzPosicaoY y)) $ Scale 1 1 $ fromJust $ lookup "Fantasma" images, desenhaInimigos images t]
+desenhaInimigos images (i@(Personagem _ Fantasma (x,y) direcao tamanho _ _ _ _ _):t) =  Pictures [ Translate (traduzPosicaoX x) (traduzPosicaoY y) $ Scale 1 1 $ fromJust $ lookup "Fantasma" images, desenhaInimigos images t]
 
 
 defineHitboxJ :: Personagem -> Picture
-defineHitboxJ (Personagem _ Jogador (x,y) direcao tamanho _ _ _ _ _) = Color green $ Translate ((traduzPosicaoX x)) ((traduzPosicaoY y)) $ rectangleWire hitboxLarguraj hitboxAlturaj
+defineHitboxJ (Personagem _ Jogador (x,y) direcao tamanho _ _ _ _ _) = Color green $ Translate (traduzPosicaoX x) (traduzPosicaoY y) $ rectangleWire hitboxLarguraj hitboxAlturaj
 
 defineHitboxO :: (Colecionavel,(Double,Double)) -> Picture 
-defineHitboxO (Moeda,(x,y)) = Color green $ Translate ((traduzPosicaoX x)) ((traduzPosicaoY y)) $ rectangleWire hitboxLarguraO hitboxAlturaO
+defineHitboxO (Moeda,(x,y)) = Color green $ Translate (traduzPosicaoX x) (traduzPosicaoY y) $ rectangleWire hitboxLarguraO hitboxAlturaO
 
 
 
@@ -124,7 +153,7 @@ defineHitboxO (Moeda,(x,y)) = Color green $ Translate ((traduzPosicaoX x)) ((tra
 
 fazMatriz :: [[Bloco]] -> Double -> [[(Bloco,(Double,Double))]]
 fazMatriz [] x = []
-fazMatriz mapa@((h:t)) y = fazLinha h 0 y : fazMatriz t (y+1)
+fazMatriz mapa@((h:t)) y = fazLinha h 0.5 y : fazMatriz t (y+1)
 
 fazLinha :: [Bloco] -> Double -> Double -> [(Bloco,(Double,Double))]
 fazLinha [] _ _ = []
@@ -137,19 +166,24 @@ desenhaMapa e@((Jogo mapa _ _ _), images) (h:t) = pictures [desenhaLinhaMapa ima
 desenhaLinhaMapa :: Imagens -> [(Bloco, (Double,Double))] -> Picture
 desenhaLinhaMapa _ [] = blank
 desenhaLinhaMapa images ((h,(x,y)):t) = case h of 
-                Plataforma -> Pictures [Translate (traduzPosicaoX (x)) (traduzPosicaoY (y)) $ Scale 1 1 $ fromJust $ lookup "Plataforma" images, desenhaLinhaMapa images t ]
-                Escada -> Pictures [Translate ((traduzPosicaoX ( x))) ((traduzPosicaoY ( y))) $ Scale  2.5 2.5 $ fromJust $ lookup "Escada" images, desenhaLinhaMapa images t ]
-                Vazio -> Pictures [Translate ((traduzPosicaoX ( x))) ((traduzPosicaoY ( y))) $ Scale 0.3 0.3 $ fromJust $ lookup "Vazio" images, desenhaLinhaMapa images t ]
-                Alcapao -> Pictures [Translate ((traduzPosicaoX ( x))) ((traduzPosicaoY ( y))) $ Scale 1 1 $ fromJust $ lookup "Alcapao" images , desenhaLinhaMapa images t ]
+                Plataforma -> Pictures [Translate (traduzPosicaoX x) (traduzPosicaoY y) $ Scale 1 1 $ fromJust $ lookup "Plataforma" images, desenhaLinhaMapa images t ]
+                Escada -> Pictures     [Translate (traduzPosicaoX x) (traduzPosicaoY y) $ Scale  2.5 2.5 $ fromJust $ lookup "Escada" images, desenhaLinhaMapa images t ]
+                Vazio -> Pictures      [Translate (traduzPosicaoX x) (traduzPosicaoY y) $ Scale 0.3 0.3 $ fromJust $ lookup "Vazio" images, desenhaLinhaMapa images t ]
+                Alcapao -> Pictures    [Translate (traduzPosicaoX x) (traduzPosicaoY y) $ Scale 1 1 $ fromJust $ lookup "Alcapao" images , desenhaLinhaMapa images t ]
 
 
-desenhaEstado :: Imagens -> Jogo -> Picture 
-desenhaEstado images jogo@(Jogo mapa@(Mapa (posi,dir) posf blocos) inimigos colecionaveis jogador)   
-                        = pictures [ fromJust (lookup "Fundo" images),
-                        desenhaMapa (jogo, images) (fazMatriz blocos 0),
-                        desenhaJogador images jogador,
-                        desenhaObjetivo images colecionaveis,
-                        desenhaInimigos images inimigos]
+desenhaEstado :: Imagens -> World -> Picture 
+desenhaEstado images (World menu1 (jogo@(Jogo mapa@(Mapa (posi,dir) posf blocos) inimigos colecionaveis jogador)) menugameover menuvitoria menuatual)   
+                        
+                        |menuatual == "nomenu" =  desenhaMenu menu1 images
+                        |menuatual == "jogo" =
+                            pictures [ fromJust (lookup "Fundo" images),
+                            desenhaMapa (jogo, images) (fazMatriz blocos 0.5),
+                            desenhaJogador images jogador,
+                            desenhaObjetivo images colecionaveis,
+                            desenhaInimigos images inimigos]
+                        |menuatual == "vitoria" = desenhawin menuvitoria images
+                        |menuatual == "gameover" = desenhalose menugameover images
 
 carregarImagens :: IO Imagens
 carregarImagens = do
@@ -186,10 +220,11 @@ carregarImagens = do
         
         return imagens
 
+main :: IO ()
 main = do 
         images <- carregarImagens 
         play 
-                FullScreen                        
+                FullScreen                     
                 black               
                 fr                      
                 (estadoInicial images)
