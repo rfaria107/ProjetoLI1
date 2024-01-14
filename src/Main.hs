@@ -130,10 +130,10 @@ reageTempo dt mundo1 = mundo1 { jogo = movimenta 3 (float2Double dt) (jogo mundo
 
 desenhaJogador :: Imagens -> Personagem -> Picture
 desenhaJogador images j@(Personagem vel Jogador (x,y) direcao tamanho _ _ _ _ armado)
-    | fst vel >=0 && fst armado == False =Pictures [ Translate (traduzPosicaoX x) (traduzPosicaoY y) $ Scale 0.9 0.9 $ fromJust $ lookup "MarioDireita" images]
-    | fst vel <0 && fst armado == False =Pictures [ Translate (traduzPosicaoX x) (traduzPosicaoY y) $ Scale 0.9 0.9$ fromJust $ lookup "MarioEsquerda" images]
-    | fst vel >=0 && fst armado == True =Pictures [ Translate (traduzPosicaoX x) (traduzPosicaoY y) $ Scale 0.9 0.9 $ fromJust $ lookup "ArmadoDireita" images]
-    | fst vel <0 && fst armado == True =Pictures [ Translate (traduzPosicaoX x) (traduzPosicaoY y) $ Scale 0.9 0.9 $ fromJust $ lookup "ArmadoEsquerda" images]
+    | fst vel >=0 && fst armado == False =Pictures [ Translate (traduzPosicaoX x) (traduzPosicaoY y + 10) $ Scale 0.9 0.9 $ fromJust $ lookup "MarioDireita" images]
+    | fst vel <0 && fst armado == False =Pictures [ Translate (traduzPosicaoX x) (traduzPosicaoY y +10) $ Scale 0.9 0.9$ fromJust $ lookup "MarioEsquerda" images]
+    | fst vel >=0 && fst armado == True =Pictures [ Translate (traduzPosicaoX x) (traduzPosicaoY y +10) $ Scale 0.9 0.9 $ fromJust $ lookup "ArmadoDireita" images]
+    | fst vel <0 && fst armado == True =Pictures [ Translate (traduzPosicaoX x) (traduzPosicaoY y +10) $ Scale 0.9 0.9 $ fromJust $ lookup "ArmadoEsquerda" images]
 
 desenhaObjetivo :: Imagens -> [(Colecionavel, (Double,Double))] -> Picture
 desenhaObjetivo _ [] = blank
