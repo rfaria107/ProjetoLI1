@@ -14,7 +14,8 @@ import Data.Maybe
 
 atualiza :: [Maybe Acao] -> Maybe Acao -> Jogo -> Jogo
 atualiza acoesinimigos acao jogo1 = jogo1 {
-    jogador = (velocidadeJogador (jogador jogo1) acao)
+    jogador = (velocidadeJogador (jogador jogo1) acao),
+    inimigos = velocidadeinimigos (inimigos jogo1) (geraAcoes 2 3)
                                     }
                                     
 velocidadeJogador :: Personagem -> Maybe Acao -> Personagem
@@ -40,27 +41,27 @@ velocidadeJogador j1@(Personagem (vx,vy) Jogador (x,y) dir (c,l) esc ress vidas 
                     | acao == Nothing = j1 {
                         velocidade = (vx,vy)
                     }
-moverinimigos :: [Personagem] -> [Maybe Acao] -> [Personagem]
-moverinimigos (inimigo1@(Personagem (vx,vy) Fantasma _ _ _ _ _ _ _ _):is) (acao:as)
-                                    | acao == Just Saltar = inimigo1 {
-                                        velocidade = (vx,vy-1)
-                                    } : moverinimigos is as
+                    
+velocidadeinimigos :: [Personagem] -> [Maybe Acao] -> [Personagem]
+velocidadeinimigos [] _ = []
+velocidadeinimigos (inimigo1@(Personagem (vx,vy) MacacoMalvado _ _ _ _ _ _ _ _):is) (acao:as) = inimigo1 {
+                                        velocidade = (0,0)} : velocidadeinimigos is as
+velocidadeinimigos (inimigo1@(Personagem (vx,vy) Fantasma _ _ _ _ _ _ _ _):is) (acao:as)
                                     | acao == Just AndarDireita = inimigo1 {
-                                        velocidade = (1,vy)
-                                    } : moverinimigos is as
+                                        velocidade = (0.1,vy)
+                                    } : velocidadeinimigos is as
                                     | acao == Just AndarEsquerda = inimigo1 {
-                                        velocidade = (-1,vy)
-                                    } : moverinimigos is as
-                                    | acao == Just Subir = inimigo1 {
-                                        velocidade = (vx,vy-1)
-                                    } : moverinimigos is as
-                                    | acao == Just Descer = inimigo1 {
-                                        velocidade = (vx,vy+1)
-                                    } : moverinimigos is as
-                                    | acao == Just Parar = inimigo1 {
-                                        velocidade = (0,0)
-                                    } : moverinimigos is as
+                                        velocidade = (-0.1,vy)
+                                    } : velocidadeinimigos is as
                                     | acao == Nothing = inimigo1 {
                                         velocidade = (vx,vy)
-                                    } : moverinimigos is as
+                                    } : velocidadeinimigos is as
 
+geraAcao :: Int -> Maybe Acao
+geraAcao randomInt 
+                    |odd randomInt = Just AndarDireita
+                    |even randomInt = Just AndarEsquerda
+                    |otherwise = Nothing
+
+geraAcoes :: Semente -> Int -> [Maybe Acao]
+geraAcoes s c = map geraAcao  (geraAleatorios s c)

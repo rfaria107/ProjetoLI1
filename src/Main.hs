@@ -9,6 +9,7 @@ import Tarefa2
 import Tarefa3
 import Tarefa4
 import GHC.Float (float2Double, double2Float, float2Int, int2Double)
+import System.Random
 
 type Images = [Picture]
 type Imagens = [(String,Picture)]
@@ -40,7 +41,7 @@ altura :: Float
 altura =  1080
 
 comprimento :: Float 
-comprimento = (-1920) 
+comprimento = -1920
 
 --largura das peças do mapa
 l :: Float
@@ -100,18 +101,19 @@ getMapa j = mapa j
 estadoInicial :: Imagens -> World
 estadoInicial imagens = World defineMenu1 definejogo1 menuvitoria1 menugameover1 "nomenu"
 
+
 reageEvento :: Event -> World -> World
 reageEvento (EventKey (SpecialKey KeyEnter) Down _ _) mundo1 = mundo1 { menuatual = "jogo"}
-reageEvento (EventKey (SpecialKey KeySpace) Down _ _) mundo1 =  mundo1 { jogo = (atualiza [Nothing, Nothing] (Just Saltar) (jogo mundo1))}
-reageEvento (EventKey (SpecialKey KeyLeft) Down _ _) mundo1 = mundo1 { jogo = (atualiza [Nothing, Nothing] (Just AndarEsquerda) (jogo mundo1)) }
-reageEvento (EventKey (SpecialKey KeyLeft) Up _ _) mundo1 = mundo1 { jogo = (atualiza [Nothing, Nothing] (Just Parar) (jogo mundo1)) }
-reageEvento (EventKey (SpecialKey KeyRight) Down _ _) mundo1 = mundo1 { jogo =  (atualiza [Nothing, Nothing] (Just AndarDireita) (jogo mundo1)) }
-reageEvento (EventKey (SpecialKey KeyRight) Up _ _) mundo1 = mundo1 { jogo = (atualiza [Nothing, Nothing] (Just Parar) (jogo mundo1)) }
+reageEvento (EventKey (SpecialKey KeySpace) Down _ _) mundo1 =  mundo1 { jogo = (atualiza (geraAcoes 1 3) (Just Saltar) (jogo mundo1))}
+reageEvento (EventKey (SpecialKey KeyLeft) Down _ _) mundo1 = mundo1 { jogo = (atualiza (geraAcoes 3 3)  (Just AndarEsquerda) (jogo mundo1)) }
+reageEvento (EventKey (SpecialKey KeyLeft) Up _ _) mundo1 = mundo1 { jogo = (atualiza (geraAcoes 4 3) (Just Parar) (jogo mundo1)) }
+reageEvento (EventKey (SpecialKey KeyRight) Down _ _) mundo1 = mundo1 { jogo =  (atualiza (geraAcoes 6 3)  (Just AndarDireita) (jogo mundo1)) }
+reageEvento (EventKey (SpecialKey KeyRight) Up _ _) mundo1 = mundo1 { jogo = (atualiza (geraAcoes 5 3)  (Just Parar) (jogo mundo1)) }
 --escadas
-reageEvento (EventKey (SpecialKey KeyUp) Down _ _) (mundo1) = if colisaoPersonagemEscada (jogador (jogo mundo1)) (jogo mundo1) then mundo1 { jogo = (atualiza [Nothing,Nothing] (Just Subir) (jogo mundo1)) } else mundo1 {jogo = (jogo mundo1)}
-reageEvento (EventKey (SpecialKey KeyUp) Up _ _) (mundo1) =  mundo1 { jogo = (atualiza [Nothing, Nothing] (Just Parar) (jogo mundo1))}
-reageEvento (EventKey (SpecialKey KeyDown) Down _ _) (mundo1) = if colisaoPersonagemEscada (jogador (jogo mundo1)) (jogo mundo1) then mundo1 { jogo = (atualiza [Nothing,Nothing] (Just Descer) (jogo mundo1)) } else mundo1 {jogo = (jogo mundo1)}
-reageEvento (EventKey (SpecialKey KeyDown) Up _ _) (mundo1) = mundo1 { jogo = (atualiza [Nothing, Nothing] (Just Parar) (jogo mundo1))}
+reageEvento (EventKey (SpecialKey KeyUp) Down _ _) (mundo1) = if colisaoPersonagemEscada (jogador (jogo mundo1)) (jogo mundo1) then mundo1 { jogo = (atualiza (geraAcoes 2 3)  (Just Subir) (jogo mundo1)) } else mundo1 {jogo = (jogo mundo1)}
+reageEvento (EventKey (SpecialKey KeyUp) Up _ _) (mundo1) =  mundo1 { jogo = (atualiza (geraAcoes 2 3)  (Just Parar) (jogo mundo1))}
+reageEvento (EventKey (SpecialKey KeyDown) Down _ _) (mundo1) = if colisaoPersonagemEscada (jogador (jogo mundo1)) (jogo mundo1) then mundo1 { jogo = (atualiza (geraAcoes 2 3) (Just Descer) (jogo mundo1)) } else mundo1 {jogo = (jogo mundo1)}
+reageEvento (EventKey (SpecialKey KeyDown) Up _ _) (mundo1) = mundo1 { jogo = (atualiza (geraAcoes 2 3)  (Just Parar) (jogo mundo1))}
 reageEvento _ mundo1 = mundo1  
 
 vitoriaderrotajogo :: World -> String
@@ -124,20 +126,19 @@ vitoriaderrotajogo mundo    |menuatual mundo == "jogo" && colisaoHitbox (defineH
                                                       cs = (fst pos + 0.5 , snd pos + 0.5)
 
 reageTempo :: Float -> World -> World
-reageTempo dt mundo1 = mundo1 { jogo = movimenta 1 (float2Double dt) $ (jogo mundo1), menuatual = vitoriaderrotajogo (mundo1) }
+reageTempo dt mundo1 = mundo1 { jogo = movimenta 3 (float2Double dt) (jogo mundo1), menuatual = vitoriaderrotajogo mundo1 }
 
 desenhaJogador :: Imagens -> Personagem -> Picture
 desenhaJogador images j@(Personagem vel Jogador (x,y) direcao tamanho _ _ _ _ armado)
-    | fst vel >=0 && fst armado == False =Pictures [ Translate (traduzPosicaoX x) (traduzPosicaoY y) $ Scale 0.9 0.9 $ fromJust $ lookup "MarioDireita" images , defineHitboxJ j]
-    | fst vel <0 && fst armado == False =Pictures [ Translate (traduzPosicaoX x) (traduzPosicaoY y) $ Scale 0.9 0.9$ fromJust $ lookup "MarioEsquerda" images , defineHitboxJ j]
-    | fst vel >=0 && fst armado == True =Pictures [ Translate (traduzPosicaoX x) (traduzPosicaoY y) $ Scale 0.9 0.9 $ fromJust $ lookup "ArmadoDireita" images , defineHitboxJ j]
-    | fst vel <0 && fst armado == True =Pictures [ Translate (traduzPosicaoX x) (traduzPosicaoY y) $ Scale 0.9 0.9 $ fromJust $ lookup "ArmadoEsquerda" images , defineHitboxJ j]
+    | fst vel >=0 && fst armado == False =Pictures [ Translate (traduzPosicaoX x) (traduzPosicaoY y) $ Scale 0.9 0.9 $ fromJust $ lookup "MarioDireita" images]
+    | fst vel <0 && fst armado == False =Pictures [ Translate (traduzPosicaoX x) (traduzPosicaoY y) $ Scale 0.9 0.9$ fromJust $ lookup "MarioEsquerda" images]
+    | fst vel >=0 && fst armado == True =Pictures [ Translate (traduzPosicaoX x) (traduzPosicaoY y) $ Scale 0.9 0.9 $ fromJust $ lookup "ArmadoDireita" images]
+    | fst vel <0 && fst armado == True =Pictures [ Translate (traduzPosicaoX x) (traduzPosicaoY y) $ Scale 0.9 0.9 $ fromJust $ lookup "ArmadoEsquerda" images]
 
 desenhaObjetivo :: Imagens -> [(Colecionavel, (Double,Double))] -> Picture
 desenhaObjetivo _ [] = blank
 desenhaObjetivo images (w@(Moeda, (x,y)):t) = Pictures [Translate (traduzPosicaoX x) (traduzPosicaoY y) $ fromJust $ lookup "Moeda" images, desenhaObjetivo images t ]
 desenhaObjetivo images (w@(Martelo, (x,y)):t) = Pictures [Translate (traduzPosicaoX x) (traduzPosicaoY y) $ fromJust $ lookup "Martelo" images, desenhaObjetivo images t]
-desenhaObjetivo images ((_, _):t) = desenhaObjetivo images t
 
 desenhaVitoria :: Imagens -> Posicao -> Picture
 desenhaVitoria images (x,y) = Pictures [Translate (traduzPosicaoX x) (traduzPosicaoY y) $ fromJust $ lookup "Peach" images]
@@ -172,7 +173,7 @@ desenhaLinhaMapa _ [] = blank
 desenhaLinhaMapa images ((h,(x,y)):t) = case h of 
                 Plataforma -> Pictures [Translate (traduzPosicaoX x) (traduzPosicaoY y) $ Scale 1 1 $ fromJust $ lookup "Plataforma" images, desenhaLinhaMapa images t ]
                 Escada -> Pictures     [Translate (traduzPosicaoX x) (traduzPosicaoY y) $ Scale  1 2 $ fromJust $ lookup "Escada" images, desenhaLinhaMapa images t ]
-                Vazio -> Pictures      [Translate (traduzPosicaoX x) (traduzPosicaoY y) $ Scale 0.3 0.3 $ fromJust $ lookup "Vazio" images, desenhaLinhaMapa images t ]
+                Vazio -> Pictures      [Translate (traduzPosicaoX x) (traduzPosicaoY y) $ Scale 1 1 $ fromJust $ lookup "Vazio" images, desenhaLinhaMapa images t ]
                 Alcapao -> Pictures    [Translate (traduzPosicaoX x) (traduzPosicaoY y) $ Scale 1 1 $ fromJust $ lookup "Alcapao" images , desenhaLinhaMapa images t ]
 
 desenhaEstado :: Imagens -> World -> Picture 
@@ -208,9 +209,9 @@ carregarImagens = do
         martelo <- loadBMP "../2023li1g086/resources/martelo.bmp"
         macaco  <- loadBMP "../2023li1g086/resources/macaco.bmp"
         moeda  <- loadBMP "../2023li1g086/resources/Moeda.bmp"
-        let imagens = [ ("Plataforma", scale 0.5 0.35 $ plataforma),
-                        ("Escada", scale 1 1 $ escadas),
-                        ("Alcapao", scale 1 0.6 $ alcapao),
+        let imagens = [ ("Plataforma", scale 0.5 0.5625 $ plataforma),
+                        ("Escada", scale 1.3 1 $ escadas),
+                        ("Alcapao", scale 1 1 $ alcapao),
                         ("Vazio", Blank),
                         ("Peach", scale 1 1 $ peach),
                         ("Fantasma", scale 0.2 0.2 $ fantasma),
