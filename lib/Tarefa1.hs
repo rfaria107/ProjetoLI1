@@ -53,7 +53,7 @@ colisaoBloco p1@(Personagem _ _ (x,y) _ _ _ _ _ _ _) plataformas = any (==True) 
 --colisões úteis para outras funções
 
 escolheBloco :: Personagem -> Mapa -> Bloco -- | escolhe o bloco abaixo da personagem (útil para colisões com alçapão)
-escolheBloco p1@(Personagem _ _ (x,y) _ (l,a) _ _ _ _ _) (Mapa _ _ mblocos) = (mblocos !! floor y) !! floor x
+escolheBloco p1@(Personagem _ _ (x,y) _ (l,a) _ _ _ _ _) (Mapa _ _ mblocos) = (mblocos !! floor (y+0.1)) !! floor x
 
 colisaoBlocoPersonagem :: Personagem -> Bloco -> Bool -- | verifica se a persongem está em cima de uma plataforma
 colisaoBlocoPersonagem p1 b = colisaoHitbox (defineHitbox p1) (hitboxPlat ((fst (posicao p1),snd (posicao p1)),b)) 

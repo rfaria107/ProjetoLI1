@@ -1,5 +1,4 @@
 module Main where
-
 import LI12324 
 import Graphics.Gloss
 import Graphics.Gloss.Interface.Pure.Game 
@@ -26,17 +25,16 @@ data World =
 data Menu = Menu Int | GameOver Int | Vitoria Int
 
 hitboxLarguraj :: Float
-hitboxLarguraj = 70
+hitboxLarguraj = 96
 
 hitboxAlturaj :: Float
-hitboxAlturaj = 89
+hitboxAlturaj = 96
 
 hitboxLarguraO :: Float
 hitboxLarguraO =  60
 
 hitboxAlturaO :: Float
 hitboxAlturaO = 100
-
 
 altura :: Float
 altura =  1080
@@ -51,22 +49,13 @@ l = 96
 --Desenhar o Menu
 
 desenhaMenu :: Menu -> Imagens -> Picture
-desenhaMenu (Menu menu1) images = Scale 3 3 $ Translate 0 0 $ fromJust $ lookup "Menu" images 
+desenhaMenu (Menu menu1) images = Scale 1 1 $ Translate 0 0 $ fromJust $ lookup "Menu" images 
 
 desenhawin :: Menu -> Imagens -> Picture
-desenhawin (Menu menu1) images = Translate 0 100 $ fromJust $ lookup "FundoVitoria" images 
+desenhawin (Menu menu1) images = Translate 0 0 $ fromJust $ lookup "FundoVitoria" images 
 
 desenhalose :: Menu -> Imagens -> Picture
-desenhalose (Menu menu1) images = Translate 0 100 $ fromJust $ lookup "FundoGameOver" images 
-
-
-inimigo1 = Personagem (0,0) Fantasma (2,2) Este (1,1) False True 1 0 (False,0)
-
-
-inimigo2 = Personagem (0,0) Fantasma (6,5.5) Oeste (1,1) False True 1 0 (False,0)
-
-
-jogador1 = Personagem (0,0) Jogador (2,8) Oeste (0.5,0.5) False False 3 0 (False,0)
+desenhalose (Menu menu1) images = Translate 0 0 $ fromJust $ lookup "FundoGameOver" images 
 
 --não utilizado
 janela :: Display
@@ -74,6 +63,8 @@ janela = InWindow "Moon Kong" (1920,1080) (0,0)
 
 fr :: Int
 fr = 60
+
+--Menus e jogos utilizado (os menus são apenas inteiros que servem apenas para indicar o que desenhar no ecrã, essa seleção é feita pela string "menuatual")
 
 defineMenu1 :: Menu
 defineMenu1 = Menu 1
@@ -87,8 +78,8 @@ menugameover1 = Menu 3
 definejogo1 :: Jogo
 definejogo1 = Jogo m i c j
                 where   m = mapa1
-                        i = [inimigo1,inimigo2]
-                        c = [(Moeda,(15,2)),(Martelo,(6,8))]
+                        i = [inimigo1,inimigo2,inimigo3]
+                        c = [(Moeda,(15,5)),(Martelo,(17,8.5))]
                         j = jogador1
 
 mundo1 :: World
@@ -123,31 +114,44 @@ reageEvento (EventKey (SpecialKey KeyDown) Down _ _) (mundo1) = if colisaoPerson
 reageEvento (EventKey (SpecialKey KeyDown) Up _ _) (mundo1) = mundo1 { jogo = (atualiza [Nothing, Nothing] (Just Parar) (jogo mundo1))}
 reageEvento _ mundo1 = mundo1  
 
- 
+vitoriaderrotajogo :: World -> String
+vitoriaderrotajogo mundo    |menuatual mundo == "jogo" && colisaoHitbox (defineHitbox (jogador (jogo mundo))) (defineHitboxPos ((mapa (jogo mundo)))) = "vitoria"
+                            |menuatual mundo ==  "jogo" && vida (jogador (jogo mundo)) == 0 = "gameover"
+                            |otherwise = menuatual mundo
+                                    where defineHitboxPos :: Mapa -> Hitbox
+                                          defineHitboxPos (Mapa _ pos _) = (ci,cs)
+                                                where ci = (fst pos - 0.5, snd pos - 0.5)
+                                                      cs = (fst pos + 0.5 , snd pos + 0.5)
+
 reageTempo :: Float -> World -> World
-reageTempo dt mundo1 = mundo1 { jogo = movimenta 1 (float2Double dt) $ (jogo mundo1) }
+reageTempo dt mundo1 = mundo1 { jogo = movimenta 1 (float2Double dt) $ (jogo mundo1), menuatual = vitoriaderrotajogo (mundo1) }
 
 desenhaJogador :: Imagens -> Personagem -> Picture
-desenhaJogador images j@(Personagem _ Jogador (x,y) direcao tamanho _ _ _ _ _) =
-    Pictures [ Translate (traduzPosicaoX x) (traduzPosicaoY y) $ Scale 1 1 $ fromJust $ lookup "MarioDireita" images , defineHitboxJ j]
+desenhaJogador images j@(Personagem vel Jogador (x,y) direcao tamanho _ _ _ _ armado)
+    | fst vel >=0 && fst armado == False =Pictures [ Translate (traduzPosicaoX x) (traduzPosicaoY y) $ Scale 0.9 0.9 $ fromJust $ lookup "MarioDireita" images , defineHitboxJ j]
+    | fst vel <0 && fst armado == False =Pictures [ Translate (traduzPosicaoX x) (traduzPosicaoY y) $ Scale 0.9 0.9$ fromJust $ lookup "MarioEsquerda" images , defineHitboxJ j]
+    | fst vel >=0 && fst armado == True =Pictures [ Translate (traduzPosicaoX x) (traduzPosicaoY y) $ Scale 0.9 0.9 $ fromJust $ lookup "ArmadoDireita" images , defineHitboxJ j]
+    | fst vel <0 && fst armado == True =Pictures [ Translate (traduzPosicaoX x) (traduzPosicaoY y) $ Scale 0.9 0.9 $ fromJust $ lookup "ArmadoEsquerda" images , defineHitboxJ j]
 
 desenhaObjetivo :: Imagens -> [(Colecionavel, (Double,Double))] -> Picture
 desenhaObjetivo _ [] = blank
-desenhaObjetivo images (w@(Moeda, (x,y)):t) = Pictures [Translate (traduzPosicaoX x) (traduzPosicaoY y) $ fromJust $ lookup "Peach" images, defineHitboxO w ]
+desenhaObjetivo images (w@(Moeda, (x,y)):t) = Pictures [Translate (traduzPosicaoX x) (traduzPosicaoY y) $ fromJust $ lookup "Moeda" images, desenhaObjetivo images t ]
+desenhaObjetivo images (w@(Martelo, (x,y)):t) = Pictures [Translate (traduzPosicaoX x) (traduzPosicaoY y) $ fromJust $ lookup "Martelo" images, desenhaObjetivo images t]
 desenhaObjetivo images ((_, _):t) = desenhaObjetivo images t
+
+desenhaVitoria :: Imagens -> Posicao -> Picture
+desenhaVitoria images (x,y) = Pictures [Translate (traduzPosicaoX x) (traduzPosicaoY y) $ fromJust $ lookup "Peach" images]
 
 desenhaInimigos :: Imagens -> [Personagem] -> Picture 
 desenhaInimigos _ [] = blank
 desenhaInimigos images (i@(Personagem _ Fantasma (x,y) direcao tamanho _ _ _ _ _):t) =  Pictures [ Translate (traduzPosicaoX x) (traduzPosicaoY y) $ Scale 1 1 $ fromJust $ lookup "Fantasma" images, desenhaInimigos images t]
-
+desenhaInimigos images (i@(Personagem _ MacacoMalvado (x,y) direcao tamanho _ _ _ _ _):t) =  Pictures [ Translate (traduzPosicaoX x) (traduzPosicaoY y) $ Scale 1 1 $ fromJust $ lookup "Macaco" images, desenhaInimigos images t]
 
 defineHitboxJ :: Personagem -> Picture
 defineHitboxJ (Personagem _ Jogador (x,y) direcao tamanho _ _ _ _ _) = Color green $ Translate (traduzPosicaoX x) (traduzPosicaoY y) $ rectangleWire hitboxLarguraj hitboxAlturaj
 
 defineHitboxO :: (Colecionavel,(Double,Double)) -> Picture 
 defineHitboxO (Moeda,(x,y)) = Color green $ Translate (traduzPosicaoX x) (traduzPosicaoY y) $ rectangleWire hitboxLarguraO hitboxAlturaO
-
-
 
 --mapa 
 
@@ -167,10 +171,9 @@ desenhaLinhaMapa :: Imagens -> [(Bloco, (Double,Double))] -> Picture
 desenhaLinhaMapa _ [] = blank
 desenhaLinhaMapa images ((h,(x,y)):t) = case h of 
                 Plataforma -> Pictures [Translate (traduzPosicaoX x) (traduzPosicaoY y) $ Scale 1 1 $ fromJust $ lookup "Plataforma" images, desenhaLinhaMapa images t ]
-                Escada -> Pictures     [Translate (traduzPosicaoX x) (traduzPosicaoY y) $ Scale  2.5 2.5 $ fromJust $ lookup "Escada" images, desenhaLinhaMapa images t ]
+                Escada -> Pictures     [Translate (traduzPosicaoX x) (traduzPosicaoY y) $ Scale  1 2 $ fromJust $ lookup "Escada" images, desenhaLinhaMapa images t ]
                 Vazio -> Pictures      [Translate (traduzPosicaoX x) (traduzPosicaoY y) $ Scale 0.3 0.3 $ fromJust $ lookup "Vazio" images, desenhaLinhaMapa images t ]
                 Alcapao -> Pictures    [Translate (traduzPosicaoX x) (traduzPosicaoY y) $ Scale 1 1 $ fromJust $ lookup "Alcapao" images , desenhaLinhaMapa images t ]
-
 
 desenhaEstado :: Imagens -> World -> Picture 
 desenhaEstado images (World menu1 (jogo@(Jogo mapa@(Mapa (posi,dir) posf blocos) inimigos colecionaveis jogador)) menugameover menuvitoria menuatual)   
@@ -181,19 +184,20 @@ desenhaEstado images (World menu1 (jogo@(Jogo mapa@(Mapa (posi,dir) posf blocos)
                             desenhaMapa (jogo, images) (fazMatriz blocos 0.5),
                             desenhaJogador images jogador,
                             desenhaObjetivo images colecionaveis,
-                            desenhaInimigos images inimigos]
+                            desenhaInimigos images inimigos,
+                            desenhaVitoria images posf]
                         |menuatual == "vitoria" = desenhawin menuvitoria images
                         |menuatual == "gameover" = desenhalose menugameover images
 
 carregarImagens :: IO Imagens
 carregarImagens = do
         plataforma <- loadBMP "../2023li1g086/resources/blocolua.bmp"
-        escadas <- loadBMP "../2023li1g086/resources/Ladder.bmp"
+        escadas <- loadBMP "../2023li1g086/resources/grey-ladder.bmp"
         alcapao <- loadBMP "../2023li1g086/resources/alcapao.bmp"
-        objetivo <- loadBMP "../2023li1g086/resources/goal.bmp"
+        peach <- loadBMP "../2023li1g086/resources/peach.bmp"
         fantasma <- loadBMP "../2023li1g086/resources/Fantasma.bmp"
         menuinicial <- loadBMP "../2023li1g086/resources/fundomenu.bmp"
-        fundo <- loadBMP "../2023li1g086/resources/fundolua.bmp"
+        fundo <- loadBMP "../2023li1g086/resources/fundolua2.bmp"
         armadodireita <- loadBMP "../2023li1g086/resources/armadodireita.bmp"
         armadoesquerda <- loadBMP "../2023li1g086/resources/armadoesquerda.bmp"
         mariodireita <- loadBMP "../2023li1g086/resources/mariodireita.bmp"
@@ -201,13 +205,16 @@ carregarImagens = do
         fundovitoria <- loadBMP "../2023li1g086/resources/fundovitoria.bmp"
         fundogameover <- loadBMP "../2023li1g086/resources/gameover.bmp"
         letrasmenu <- loadBMP "../2023li1g086/resources/letrasmenu.bmp"
-        let imagens = [ ("Plataforma", scale 0.5 0.5 $ plataforma),
-                        ("Escada", scale 0.43 0.5 $ escadas),
-                        ("Alcapao", scale 0.52 0.36 $ alcapao),
+        martelo <- loadBMP "../2023li1g086/resources/martelo.bmp"
+        macaco  <- loadBMP "../2023li1g086/resources/macaco.bmp"
+        moeda  <- loadBMP "../2023li1g086/resources/Moeda.bmp"
+        let imagens = [ ("Plataforma", scale 0.5 0.35 $ plataforma),
+                        ("Escada", scale 1 1 $ escadas),
+                        ("Alcapao", scale 1 0.6 $ alcapao),
                         ("Vazio", Blank),
-                        ("Peach", scale 0.2 0.2 $ objetivo),
+                        ("Peach", scale 1 1 $ peach),
                         ("Fantasma", scale 0.2 0.2 $ fantasma),
-                        ("Menu", scale 0.2 0.2 $ menuinicial),
+                        ("Menu", scale 1 1 $ menuinicial),
                         ("Fundo", scale 1 1 $ fundo),
                         ("ArmadoDireita", scale 1 1 $ armadodireita),
                         ("ArmadoEsquerda", scale 1 1 $ armadoesquerda),
@@ -215,9 +222,11 @@ carregarImagens = do
                         ("MarioEsquerda", scale 1 1 $ marioesquerda),
                         ("FundoVitoria", scale 1 1 $ fundovitoria),
                         ("FundoGameOver", scale 1 1 $ fundogameover),
-                        ("LetrasMenu", scale 1 1 $ letrasmenu)
+                        ("LetrasMenu", scale 1 1 $ letrasmenu),
+                        ("Martelo", scale 1 1 $ martelo),
+                        ("Macaco", scale 1 1 $ macaco),
+                        ("Moeda", scale 1 1 $ moeda)
                         ]
-        
         return imagens
 
 main :: IO ()
